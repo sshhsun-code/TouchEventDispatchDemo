@@ -1,0 +1,2 @@
+# TouchEventDispatchDemo
+通过源码和实际验证，了解Android事件分发机制及原理
