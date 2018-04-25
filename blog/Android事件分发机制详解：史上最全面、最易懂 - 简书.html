@@ -1,0 +1,4042 @@
+<!DOCTYPE html>
+<!-- saved from url=(0038)https://www.jianshu.com/p/38015afcdb58 -->
+<html><!--<![endif]--><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
+
+  <!-- Start of Baidu Transcode -->
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta name="applicable-device" content="pc,mobile">
+  <meta name="MobileOptimized" content="width">
+  <meta name="HandheldFriendly" content="true">
+  <meta name="mobile-agent" content="format=html5;url=https://www.jianshu.com/p/38015afcdb58">
+  <!-- End of Baidu Transcode -->
+
+    <meta name="description" content="前言 Android事件分发机制是Android开发者必须了解的基础 网上有大量关于Android事件分发机制的文章，但存在一些问题：内容不全、思路不清晰、无源码分析、简单问题复杂化等等 今天，我将全面总结Android的事件分发机制，我能保证这是市面上的最全面、最清晰、最易懂的 本文秉着“结论先行、详细分析在后”的原则，即先让大家感性认识，再通过理性分析从而理解问题；所以，请各位读者先记住...">
+
+  <meta name="360-site-verification" content="604a14b53c6b871206001285921e81d8">
+  <meta property="wb:webmaster" content="294ec9de89e7fadb">
+  <meta property="qc:admins" content="104102651453316562112116375">
+  <meta property="qc:admins" content="11635613706305617">
+  <meta property="qc:admins" content="1163561616621163056375">
+  <meta name="google-site-verification" content="cV4-qkUJZR6gmFeajx_UyPe47GW9vY6cnCrYtCHYNh4">
+  <meta name="google-site-verification" content="HF7lfF8YEGs1qtCE-kPml8Z469e2RHhGajy6JPVy5XI">
+  <meta http-equiv="mobile-agent" content="format=html5; url=https://www.jianshu.com/p/38015afcdb58">
+
+  <!-- Apple -->
+  <meta name="apple-mobile-web-app-title" content="简书">
+
+    <!--  Meta for Smart App Banner -->
+  <meta name="apple-itunes-app" content="app-id=888237539, app-argument=jianshu://notes/6978588">
+  <!-- End -->
+
+  <!--  Meta for Twitter Card -->
+  <meta content="summary" property="twitter:card">
+  <meta content="@jianshucom" property="twitter:site">
+  <meta content="Android事件分发机制详解：史上最全面、最易懂" property="twitter:title">
+  <meta content="前言 Android事件分发机制是Android开发者必须了解的基础 网上有大量关于Android事件分发机制的文章，但存在一些问题：内容不全、思路不清晰、无源码分析、简单问..." property="twitter:description">
+  <meta content="https://www.jianshu.com/p/38015afcdb58" property="twitter:url">
+  <!-- End -->
+
+  <!--  Meta for OpenGraph -->
+  <meta property="fb:app_id" content="865829053512461">
+  <meta property="og:site_name" content="简书">
+  <meta property="og:title" content="Android事件分发机制详解：史上最全面、最易懂">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://www.jianshu.com/p/38015afcdb58">
+  <meta property="og:description" content="前言 Android事件分发机制是Android开发者必须了解的基础 网上有大量关于Android事件分发机制的文章，但存在一些问题：内容不全、思路不清晰、无源码分析、简单问题复杂化等等 今天，...">
+  <!-- End -->
+
+  <!--  Meta for Facebook Applinks -->
+  <meta property="al:ios:url" content="jianshu://notes/6978588">
+  <meta property="al:ios:app_store_id" content="888237539">
+  <meta property="al:ios:app_name" content="简书">
+
+  <meta property="al:android:url" content="jianshu://notes/6978588">
+  <meta property="al:android:package" content="com.jianshu.haruki">
+  <meta property="al:android:app_name" content="简书">
+  <!-- End -->
+
+
+    <title>Android事件分发机制详解：史上最全面、最易懂 - 简书</title>
+
+  <meta name="csrf-param" content="authenticity_token">
+<meta name="csrf-token" content="73z/0enbSldRmYcrbiT2jG7FpM8VumH7vvv0nr/Hy9DhQrHM4Zl1L7SIg82kQxsKtCX0K6kTe2i1oiTXdg1wOA==">
+
+  <link rel="stylesheet" media="all" href="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/web-56188f038c06ce022e40.css">
+  
+  <link rel="stylesheet" media="all" href="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/entry-a9201972e0c141d2fe27.css">
+
+  <link href="https://cdn2.jianshu.io/assets/favicons/favicon-e743bfb1821442341c3ab15bdbe804f7ad97676bd07a770ccc9483473aa76f06.ico" rel="shortcut icon" type="image/x-icon">
+      <link rel="apple-touch-icon-precomposed" href="https://cdn2.jianshu.io/assets/apple-touch-icons/57-a6f1f1ee62ace44f6dc2f6a08575abd3c3b163288881c78dd8d75247682a4b27.png" sizes="57x57">
+      <link rel="apple-touch-icon-precomposed" href="https://cdn2.jianshu.io/assets/apple-touch-icons/72-fb9834bcfce738fd7b9c5e31363e79443e09a81a8e931170b58bc815387c1562.png" sizes="72x72">
+      <link rel="apple-touch-icon-precomposed" href="https://cdn2.jianshu.io/assets/apple-touch-icons/76-49d88e539ff2489475d603994988d871219141ecaa0b1a7a9a1914f4fe3182d6.png" sizes="76x76">
+      <link rel="apple-touch-icon-precomposed" href="https://cdn2.jianshu.io/assets/apple-touch-icons/114-24252fe693524ed3a9d0905e49bff3cbd0228f25a320aa09053c2ebb4955de97.png" sizes="114x114">
+      <link rel="apple-touch-icon-precomposed" href="https://cdn2.jianshu.io/assets/apple-touch-icons/120-1bb7371f5e87f93ce780a5f1a05ff1b176828ee0d1d130e768575918a2e05834.png" sizes="120x120">
+      <link rel="apple-touch-icon-precomposed" href="https://cdn2.jianshu.io/assets/apple-touch-icons/152-bf209460fc1c17bfd3e2b84c8e758bc11ca3e570fd411c3bbd84149b97453b99.png" sizes="152x152">
+
+  <!-- Start of 访问统计 -->
+    <script src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/push.js.下载"></script><script src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/hm.js.下载"></script><script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?0c0e9d9b1e7d617b3e6842e85b9fb068";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+  <!-- End of 访问统计 -->
+<style type="text/css">fieldset[disabled] .multiselect {
+  pointer-events: none;
+}
+
+.multiselect__spinner {
+  position: absolute;
+  right: 1px;
+  top: 1px;
+  width: 48px;
+  height: 35px;
+  background: #fff;
+  display: block;
+}
+
+.multiselect__spinner:after,
+.multiselect__spinner:before {
+  position: absolute;
+  content: "";
+  top: 50%;
+  left: 50%;
+  margin: -8px 0 0 -8px;
+  width: 16px;
+  height: 16px;
+  border-radius: 100%;
+  border-color: #41b883 transparent transparent;
+  border-style: solid;
+  border-width: 2px;
+  box-shadow: 0 0 0 1px transparent;
+}
+
+.multiselect__spinner:before {
+  animation: a 2.4s cubic-bezier(.41,.26,.2,.62);
+  animation-iteration-count: infinite;
+}
+
+.multiselect__spinner:after {
+  animation: a 2.4s cubic-bezier(.51,.09,.21,.8);
+  animation-iteration-count: infinite;
+}
+
+.multiselect__loading-enter-active,
+.multiselect__loading-leave-active {
+  transition: opacity .4s ease-in-out;
+  opacity: 1;
+}
+
+.multiselect__loading-enter,
+.multiselect__loading-leave-active {
+  opacity: 0;
+}
+
+.multiselect,
+.multiselect__input,
+.multiselect__single {
+  font-family: inherit;
+  font-size: 14px;
+  -ms-touch-action: manipulation;
+  touch-action: manipulation;
+}
+
+.multiselect {
+  box-sizing: content-box;
+  display: block;
+  position: relative;
+  width: 100%;
+  min-height: 40px;
+  text-align: left;
+  color: #35495e;
+}
+
+.multiselect * {
+  box-sizing: border-box;
+}
+
+.multiselect:focus {
+  outline: none;
+}
+
+.multiselect--disabled {
+  opacity: .6;
+}
+
+.multiselect--active {
+  z-index: 1;
+}
+
+.multiselect--active:not(.multiselect--above) .multiselect__current,
+.multiselect--active:not(.multiselect--above) .multiselect__input,
+.multiselect--active:not(.multiselect--above) .multiselect__tags {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.multiselect--active .multiselect__select {
+  transform: rotate(180deg);
+}
+
+.multiselect--above.multiselect--active .multiselect__current,
+.multiselect--above.multiselect--active .multiselect__input,
+.multiselect--above.multiselect--active .multiselect__tags {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.multiselect__input,
+.multiselect__single {
+  position: relative;
+  display: inline-block;
+  min-height: 20px;
+  line-height: 20px;
+  border: none;
+  border-radius: 5px;
+  background: #fff;
+  padding: 0 0 0 5px;
+  width: 100%;
+  transition: border .1s ease;
+  box-sizing: border-box;
+  margin-bottom: 8px;
+  vertical-align: top;
+}
+
+.multiselect__tag~.multiselect__input,
+.multiselect__tag~.multiselect__single {
+  width: auto;
+}
+
+.multiselect__input:hover,
+.multiselect__single:hover {
+  border-color: #cfcfcf;
+}
+
+.multiselect__input:focus,
+.multiselect__single:focus {
+  border-color: #a8a8a8;
+  outline: none;
+}
+
+.multiselect__single {
+  padding-left: 6px;
+  margin-bottom: 8px;
+}
+
+.multiselect__tags-wrap {
+  display: inline;
+}
+
+.multiselect__tags {
+  min-height: 40px;
+  display: block;
+  padding: 8px 40px 0 8px;
+  border-radius: 5px;
+  border: 1px solid #e8e8e8;
+  background: #fff;
+}
+
+.multiselect__tag {
+  position: relative;
+  display: inline-block;
+  padding: 4px 26px 4px 10px;
+  border-radius: 5px;
+  margin-right: 10px;
+  color: #fff;
+  line-height: 1;
+  background: #41b883;
+  margin-bottom: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: 100%;
+  text-overflow: ellipsis;
+}
+
+.multiselect__tag-icon {
+  cursor: pointer;
+  margin-left: 7px;
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  font-weight: 700;
+  font-style: normal;
+  width: 22px;
+  text-align: center;
+  line-height: 22px;
+  transition: all .2s ease;
+  border-radius: 5px;
+}
+
+.multiselect__tag-icon:after {
+  content: "\D7";
+  color: #266d4d;
+  font-size: 14px;
+}
+
+.multiselect__tag-icon:focus,
+.multiselect__tag-icon:hover {
+  background: #369a6e;
+}
+
+.multiselect__tag-icon:focus:after,
+.multiselect__tag-icon:hover:after {
+  color: #fff;
+}
+
+.multiselect__current {
+  min-height: 40px;
+  overflow: hidden;
+  padding: 8px 12px 0;
+  padding-right: 30px;
+  white-space: nowrap;
+  border-radius: 5px;
+  border: 1px solid #e8e8e8;
+}
+
+.multiselect__current,
+.multiselect__select {
+  line-height: 16px;
+  box-sizing: border-box;
+  display: block;
+  margin: 0;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.multiselect__select {
+  position: absolute;
+  width: 40px;
+  height: 38px;
+  right: 1px;
+  top: 1px;
+  padding: 4px 8px;
+  text-align: center;
+  transition: transform .2s ease;
+}
+
+.multiselect__select:before {
+  position: relative;
+  right: 0;
+  top: 65%;
+  color: #999;
+  margin-top: 4px;
+  border-style: solid;
+  border-width: 5px 5px 0;
+  border-color: #999 transparent transparent;
+  content: "";
+}
+
+.multiselect__placeholder {
+  color: #adadad;
+  display: inline-block;
+  margin-bottom: 10px;
+  padding-top: 2px;
+}
+
+.multiselect--active .multiselect__placeholder {
+  display: none;
+}
+
+.multiselect__content-wrapper {
+  position: absolute;
+  display: block;
+  background: #fff;
+  width: 100%;
+  max-height: 240px;
+  overflow: auto;
+  border: 1px solid #e8e8e8;
+  border-top: none;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  z-index: 1;
+  -webkit-overflow-scrolling: touch;
+}
+
+.multiselect__content {
+  list-style: none;
+  display: inline-block;
+  padding: 0;
+  margin: 0;
+  min-width: 100%;
+  vertical-align: top;
+}
+
+.multiselect--above .multiselect__content-wrapper {
+  bottom: 100%;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  border-bottom: none;
+  border-top: 1px solid #e8e8e8;
+}
+
+.multiselect__content::webkit-scrollbar {
+  display: none;
+}
+
+.multiselect__element {
+  display: block;
+}
+
+.multiselect__option {
+  display: block;
+  padding: 12px;
+  min-height: 40px;
+  line-height: 16px;
+  text-decoration: none;
+  text-transform: none;
+  vertical-align: middle;
+  position: relative;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.multiselect__option:after {
+  top: 0;
+  right: 0;
+  position: absolute;
+  line-height: 40px;
+  padding-right: 12px;
+  padding-left: 20px;
+}
+
+.multiselect__option--highlight {
+  background: #41b883;
+  outline: none;
+  color: #fff;
+}
+
+.multiselect__option--highlight:after {
+  content: attr(data-select);
+  background: #41b883;
+  color: #fff;
+}
+
+.multiselect__option--selected {
+  background: #f3f3f3;
+  color: #35495e;
+  font-weight: 700;
+}
+
+.multiselect__option--selected:after {
+  content: attr(data-selected);
+  color: silver;
+}
+
+.multiselect__option--selected.multiselect__option--highlight {
+  background: #ff6a6a;
+  color: #fff;
+}
+
+.multiselect__option--selected.multiselect__option--highlight:after {
+  background: #ff6a6a;
+  content: attr(data-deselect);
+  color: #fff;
+}
+
+.multiselect--disabled {
+  background: #ededed;
+  pointer-events: none;
+}
+
+.multiselect--disabled .multiselect__current,
+.multiselect--disabled .multiselect__select,
+.multiselect__option--disabled {
+  background: #ededed;
+  color: #a6a6a6;
+}
+
+.multiselect__option--disabled {
+  cursor: text;
+  pointer-events: none;
+}
+
+.multiselect__option--disabled.multiselect__option--highlight {
+  background: #dedede!important;
+}
+
+.multiselect-enter-active,
+.multiselect-leave-active {
+  transition: all .15s ease;
+}
+
+.multiselect-enter,
+.multiselect-leave-active {
+  opacity: 0;
+}
+
+.multiselect__strong {
+  margin-bottom: 8px;
+  line-height: 20px;
+  display: inline-block;
+  vertical-align: top;
+}
+
+[dir=rtl] .multiselect {
+  text-align: right;
+}
+
+[dir=rtl] .multiselect__select {
+  right: auto;
+  left: 1px;
+}
+
+[dir=rtl] .multiselect__tags {
+  padding: 8px 8px 0 40px;
+}
+
+[dir=rtl] .multiselect__content {
+  text-align: right;
+}
+
+[dir=rtl] .multiselect__option:after {
+  right: auto;
+  left: 0;
+}
+
+[dir=rtl] .multiselect__clear {
+  right: auto;
+  left: 12px;
+}
+
+[dir=rtl] .multiselect__spinner {
+  right: auto;
+  left: 1px;
+}
+
+@keyframes a {
+  0% {
+    transform: rotate(0);
+  }
+
+  to {
+    transform: rotate(2turn);
+  }
+}</style><style type="text/css">@font-face {
+  font-family: 'KaTeX_AMS';
+  src: url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_AMS-Regular-3d8245dcb4489694a6a263b05c1cca01.woff2) format('woff2'), url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_AMS-Regular-ac1d46d953d403677171697581a284d2.woff) format('woff'), url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_AMS-Regular-c67be87adba7d31c013be127b936233d.ttf) format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'KaTeX_Caligraphic';
+  src: url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Caligraphic-Bold-970d3e76493b82fccf21ad5888ddee77.woff2) format('woff2'), url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Caligraphic-Bold-445f96a387df0d13ded71f27c608516d.woff) format('woff'), url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Caligraphic-Bold-3f61a84d76e80396489d32bc9dd8d444.ttf) format('truetype');
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'KaTeX_Caligraphic';
+  src: url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Caligraphic-Regular-0ef0f2e356a2e1c457b6585d34edae77.woff2) format('woff2'), url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Caligraphic-Regular-74f6918c7d2b768ffd32048102bc0172.woff) format('woff'), url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Caligraphic-Regular-c3bc8fcec0e85a50cabf71e4e8074991.ttf) format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'KaTeX_Fraktur';
+  src: url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Fraktur-Bold-950649ba5e5cfd37cdad74095411d350.woff2) format('woff2'), url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Fraktur-Bold-1aca7ef7f976fb54a207ffc8aa180e38.woff) format('woff'), url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Fraktur-Bold-e11e6bf02fc41279a540d3655abf3b07.ttf) format('truetype');
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'KaTeX_Fraktur';
+  src: url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Fraktur-Regular-135ccd74931753318f6f52f3fce19018.woff2) format('woff2'), url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Fraktur-Regular-c5b430bfcb3e5423b77401afcdb69b66.woff) format('woff'), url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Fraktur-Regular-a9509497466d16e6b7265a223ea39093.ttf) format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'KaTeX_Main';
+  src: url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Main-Bold-82bce349c8ff0927380b5177e9258ad0.woff2) format('woff2'), url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Main-Bold-29d4b276c622ff1d1376d9afcbd2f25a.woff) format('woff'), url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Main-Bold-db576c7d5d6eb6ebefc9b334f4140d42.ttf) format('truetype');
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'KaTeX_Main';
+  src: url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Main-BoldItalic-13900e552dbf51aead905f897043226c.woff2) format('woff2'), url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Main-BoldItalic-3f3be43bbdd58a4a86c8eddd3d39a26a.woff) format('woff'), url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Main-BoldItalic-cec43f729e0e6810c3433f6020ec676e.ttf) format('truetype');
+  font-weight: bold;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'KaTeX_Main';
+  src: url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Main-Italic-b488f60f79c9d1f533def644385d8219.woff2) format('woff2'), url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Main-Italic-f8a754484e776e94b6116dfbcb1761a7.woff) format('woff'), url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Main-Italic-85b3329fdb41fadfb0fdc01ec5290b2f.ttf) format('truetype');
+  font-weight: normal;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'KaTeX_Main';
+  src: url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Main-Regular-999cd6bac6e8118065ac500d4f133c63.woff2) format('woff2'), url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Main-Regular-485696cf1d821baac6ae06c42e09faef.woff) format('woff'), url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Main-Regular-f4fe6dca4a5f5520ae0caab31848aae3.ttf) format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'KaTeX_Math';
+  src: url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Math-Italic-7a31741a44e58952cb4b8a763c206fcd.woff2) format('woff2'), url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Math-Italic-8eb56b3ff5b141cd3732a24e65c2b339.woff) format('woff'), url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Math-Italic-10740d7488d690a743339650103f1cb3.ttf) format('truetype');
+  font-weight: normal;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'KaTeX_SansSerif';
+  src: url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_SansSerif-Bold-0d0f967a34b828083a11bb264e578c32.woff2) format('woff2'), url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_SansSerif-Bold-99bd87431ac7ef8f27591f72d7812509.woff) format('woff'), url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_SansSerif-Bold-771a1f955e7ff2106402b58d1e8a1ad2.ttf) format('truetype');
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'KaTeX_SansSerif';
+  src: url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_SansSerif-Italic-b1ac79b9b69c954bbeb8fc02500832e0.woff2) format('woff2'), url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_SansSerif-Italic-9c3f03ec809c6f298d716cbda8260fcb.woff) format('woff'), url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_SansSerif-Italic-cb729d47fbd26ff0ae62bb840085e5b5.ttf) format('truetype');
+  font-weight: normal;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'KaTeX_SansSerif';
+  src: url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_SansSerif-Regular-23f1730fda70ec6ec6aa789979890cba.woff2) format('woff2'), url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_SansSerif-Regular-fc90839714a9e877682309c3daf7493e.woff) format('woff'), url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_SansSerif-Regular-43b0cb92c2405f175772931ccd68002e.ttf) format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'KaTeX_Script';
+  src: url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Script-Regular-ae1fad1f4d1c227c9d567da8ea9f988c.woff2) format('woff2'), url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Script-Regular-60febfa114c5e32f0ce73050476aa39f.woff) format('woff'), url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Script-Regular-e9169ca7b32608b6235ec9ffff742a71.ttf) format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'KaTeX_Size1';
+  src: url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Size1-Regular-fda0824e8cfb676664ad063c367cfce3.woff2) format('woff2'), url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Size1-Regular-1d6cf6b89f694dc76e13ecc4e8214dd2.woff) format('woff'), url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Size1-Regular-f2e296ef7cef0f6f16912e5d171929b2.ttf) format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'KaTeX_Size2';
+  src: url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Size2-Regular-a7a0eb93afb696cb9b4efb87e6cd45a3.woff2) format('woff2'), url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Size2-Regular-f48e83b7bcaa68a86a78e8edfee1a04e.woff) format('woff'), url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Size2-Regular-0767ede65042583bcc06f09055f4d7ca.ttf) format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'KaTeX_Size3';
+  src: url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Size3-Regular-397bd6872be7adff4f000c49fa85a9c3.woff2) format('woff2'), url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Size3-Regular-0387ab387ace32f15b43c3a4a39f187f.woff) format('woff'), url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Size3-Regular-882f723427a0986846fe786bd8d6f6c7.ttf) format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'KaTeX_Size4';
+  src: url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Size4-Regular-3c14ed11dd8eea981c93bf283193856d.woff2) format('woff2'), url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Size4-Regular-726db3bd435c8a6e45e44741dae67263.woff) format('woff'), url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Size4-Regular-27901d5ce93d8971c416d9123fedb911.ttf) format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'KaTeX_Typewriter';
+  src: url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Typewriter-Regular-895baecfbf4ef298fdfe943fb117c15e.woff2) format('woff2'), url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Typewriter-Regular-696705de367f02534e8abb38b55af067.woff) format('woff'), url(//cdn2.jianshu.io/assets/_/_/_/_/shared/node_modules/katex/dist/fonts/KaTeX_Typewriter-Regular-6374f53e08c02d7b9ec594e2fb0c5fe8.ttf) format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+.katex-display {
+  display: block;
+  margin: 1em 0;
+  text-align: center;
+}
+
+.katex-display > .katex {
+  display: inline-block;
+  text-align: initial;
+}
+
+.katex {
+  font: normal 1.21em KaTeX_Main, Times New Roman, serif;
+  line-height: 1.2;
+  white-space: nowrap;
+  text-indent: 0;
+  text-rendering: auto;
+}
+
+.katex * {
+  -ms-high-contrast-adjust: none !important;
+}
+
+.katex .katex-html {
+  display: inline-block;
+}
+
+.katex .katex-mathml {
+  position: absolute;
+  clip: rect(1px, 1px, 1px, 1px);
+  padding: 0;
+  border: 0;
+  height: 1px;
+  width: 1px;
+  overflow: hidden;
+}
+
+.katex .base {
+  position: relative;
+  display: inline-block;
+}
+
+.katex .strut {
+  display: inline-block;
+}
+
+.katex .textbf {
+  font-weight: bold;
+}
+
+.katex .textit {
+  font-style: italic;
+}
+
+.katex .textrm {
+  font-family: KaTeX_Main;
+}
+
+.katex .textsf {
+  font-family: KaTeX_SansSerif;
+}
+
+.katex .texttt {
+  font-family: KaTeX_Typewriter;
+}
+
+.katex .mathit {
+  font-family: KaTeX_Math;
+  font-style: italic;
+}
+
+.katex .mathrm {
+  font-style: normal;
+}
+
+.katex .mathbf {
+  font-family: KaTeX_Main;
+  font-weight: bold;
+}
+
+.katex .boldsymbol {
+  font-family: KaTeX_Math;
+  font-weight: bold;
+  font-style: italic;
+}
+
+.katex .amsrm {
+  font-family: KaTeX_AMS;
+}
+
+.katex .mathbb {
+  font-family: KaTeX_AMS;
+}
+
+.katex .mathcal {
+  font-family: KaTeX_Caligraphic;
+}
+
+.katex .mathfrak {
+  font-family: KaTeX_Fraktur;
+}
+
+.katex .mathtt {
+  font-family: KaTeX_Typewriter;
+}
+
+.katex .mathscr {
+  font-family: KaTeX_Script;
+}
+
+.katex .mathsf {
+  font-family: KaTeX_SansSerif;
+}
+
+.katex .mainit {
+  font-family: KaTeX_Main;
+  font-style: italic;
+}
+
+.katex .mainrm {
+  font-family: KaTeX_Main;
+  font-style: normal;
+}
+
+.katex .vlist-t {
+  display: inline-table;
+  table-layout: fixed;
+}
+
+.katex .vlist-r {
+  display: table-row;
+}
+
+.katex .vlist {
+  display: table-cell;
+  vertical-align: bottom;
+  position: relative;
+}
+
+.katex .vlist > span {
+  display: block;
+  height: 0;
+  position: relative;
+}
+
+.katex .vlist > span > span {
+  display: inline-block;
+}
+
+.katex .vlist > span > .pstrut {
+  overflow: hidden;
+  width: 0;
+}
+
+.katex .vlist-t2 {
+  margin-right: -2px;
+}
+
+.katex .vlist-s {
+  display: table-cell;
+  vertical-align: bottom;
+  font-size: 1px;
+  width: 2px;
+}
+
+.katex .msupsub {
+  text-align: left;
+}
+
+.katex .mfrac > span > span {
+  text-align: center;
+}
+
+.katex .mfrac .frac-line {
+  display: inline-block;
+  width: 100%;
+}
+
+.katex .mspace {
+  display: inline-block;
+}
+
+.katex .mspace.negativethinspace {
+  margin-left: -0.16667em;
+}
+
+.katex .mspace.muspace {
+  width: 0.055556em;
+}
+
+.katex .mspace.thinspace {
+  width: 0.16667em;
+}
+
+.katex .mspace.negativemediumspace {
+  margin-left: -0.22222em;
+}
+
+.katex .mspace.mediumspace {
+  width: 0.22222em;
+}
+
+.katex .mspace.thickspace {
+  width: 0.27778em;
+}
+
+.katex .mspace.sixmuspace {
+  width: 0.333333em;
+}
+
+.katex .mspace.eightmuspace {
+  width: 0.444444em;
+}
+
+.katex .mspace.enspace {
+  width: 0.5em;
+}
+
+.katex .mspace.twelvemuspace {
+  width: 0.666667em;
+}
+
+.katex .mspace.quad {
+  width: 1em;
+}
+
+.katex .mspace.qquad {
+  width: 2em;
+}
+
+.katex .llap,
+.katex .rlap,
+.katex .clap {
+  width: 0;
+  position: relative;
+}
+
+.katex .llap > .inner,
+.katex .rlap > .inner,
+.katex .clap > .inner {
+  position: absolute;
+}
+
+.katex .llap > .fix,
+.katex .rlap > .fix,
+.katex .clap > .fix {
+  display: inline-block;
+}
+
+.katex .llap > .inner {
+  right: 0;
+}
+
+.katex .rlap > .inner,
+.katex .clap > .inner {
+  left: 0;
+}
+
+.katex .clap > .inner > span {
+  margin-left: -50%;
+  margin-right: 50%;
+}
+
+.katex .rule {
+  display: inline-block;
+  border: solid 0;
+  position: relative;
+}
+
+.katex .overline .overline-line,
+.katex .underline .underline-line {
+  display: inline-block;
+  width: 100%;
+}
+
+.katex .sqrt > .root {
+  margin-left: 0.27777778em;
+  margin-right: -0.55555556em;
+}
+
+.katex .sizing,
+.katex .fontsize-ensurer {
+  display: inline-block;
+}
+
+.katex .sizing.reset-size1.size1,
+.katex .fontsize-ensurer.reset-size1.size1 {
+  font-size: 1em;
+}
+
+.katex .sizing.reset-size1.size2,
+.katex .fontsize-ensurer.reset-size1.size2 {
+  font-size: 1.2em;
+}
+
+.katex .sizing.reset-size1.size3,
+.katex .fontsize-ensurer.reset-size1.size3 {
+  font-size: 1.4em;
+}
+
+.katex .sizing.reset-size1.size4,
+.katex .fontsize-ensurer.reset-size1.size4 {
+  font-size: 1.6em;
+}
+
+.katex .sizing.reset-size1.size5,
+.katex .fontsize-ensurer.reset-size1.size5 {
+  font-size: 1.8em;
+}
+
+.katex .sizing.reset-size1.size6,
+.katex .fontsize-ensurer.reset-size1.size6 {
+  font-size: 2em;
+}
+
+.katex .sizing.reset-size1.size7,
+.katex .fontsize-ensurer.reset-size1.size7 {
+  font-size: 2.4em;
+}
+
+.katex .sizing.reset-size1.size8,
+.katex .fontsize-ensurer.reset-size1.size8 {
+  font-size: 2.88em;
+}
+
+.katex .sizing.reset-size1.size9,
+.katex .fontsize-ensurer.reset-size1.size9 {
+  font-size: 3.456em;
+}
+
+.katex .sizing.reset-size1.size10,
+.katex .fontsize-ensurer.reset-size1.size10 {
+  font-size: 4.148em;
+}
+
+.katex .sizing.reset-size1.size11,
+.katex .fontsize-ensurer.reset-size1.size11 {
+  font-size: 4.976em;
+}
+
+.katex .sizing.reset-size2.size1,
+.katex .fontsize-ensurer.reset-size2.size1 {
+  font-size: 0.83333333em;
+}
+
+.katex .sizing.reset-size2.size2,
+.katex .fontsize-ensurer.reset-size2.size2 {
+  font-size: 1em;
+}
+
+.katex .sizing.reset-size2.size3,
+.katex .fontsize-ensurer.reset-size2.size3 {
+  font-size: 1.16666667em;
+}
+
+.katex .sizing.reset-size2.size4,
+.katex .fontsize-ensurer.reset-size2.size4 {
+  font-size: 1.33333333em;
+}
+
+.katex .sizing.reset-size2.size5,
+.katex .fontsize-ensurer.reset-size2.size5 {
+  font-size: 1.5em;
+}
+
+.katex .sizing.reset-size2.size6,
+.katex .fontsize-ensurer.reset-size2.size6 {
+  font-size: 1.66666667em;
+}
+
+.katex .sizing.reset-size2.size7,
+.katex .fontsize-ensurer.reset-size2.size7 {
+  font-size: 2em;
+}
+
+.katex .sizing.reset-size2.size8,
+.katex .fontsize-ensurer.reset-size2.size8 {
+  font-size: 2.4em;
+}
+
+.katex .sizing.reset-size2.size9,
+.katex .fontsize-ensurer.reset-size2.size9 {
+  font-size: 2.88em;
+}
+
+.katex .sizing.reset-size2.size10,
+.katex .fontsize-ensurer.reset-size2.size10 {
+  font-size: 3.45666667em;
+}
+
+.katex .sizing.reset-size2.size11,
+.katex .fontsize-ensurer.reset-size2.size11 {
+  font-size: 4.14666667em;
+}
+
+.katex .sizing.reset-size3.size1,
+.katex .fontsize-ensurer.reset-size3.size1 {
+  font-size: 0.71428571em;
+}
+
+.katex .sizing.reset-size3.size2,
+.katex .fontsize-ensurer.reset-size3.size2 {
+  font-size: 0.85714286em;
+}
+
+.katex .sizing.reset-size3.size3,
+.katex .fontsize-ensurer.reset-size3.size3 {
+  font-size: 1em;
+}
+
+.katex .sizing.reset-size3.size4,
+.katex .fontsize-ensurer.reset-size3.size4 {
+  font-size: 1.14285714em;
+}
+
+.katex .sizing.reset-size3.size5,
+.katex .fontsize-ensurer.reset-size3.size5 {
+  font-size: 1.28571429em;
+}
+
+.katex .sizing.reset-size3.size6,
+.katex .fontsize-ensurer.reset-size3.size6 {
+  font-size: 1.42857143em;
+}
+
+.katex .sizing.reset-size3.size7,
+.katex .fontsize-ensurer.reset-size3.size7 {
+  font-size: 1.71428571em;
+}
+
+.katex .sizing.reset-size3.size8,
+.katex .fontsize-ensurer.reset-size3.size8 {
+  font-size: 2.05714286em;
+}
+
+.katex .sizing.reset-size3.size9,
+.katex .fontsize-ensurer.reset-size3.size9 {
+  font-size: 2.46857143em;
+}
+
+.katex .sizing.reset-size3.size10,
+.katex .fontsize-ensurer.reset-size3.size10 {
+  font-size: 2.96285714em;
+}
+
+.katex .sizing.reset-size3.size11,
+.katex .fontsize-ensurer.reset-size3.size11 {
+  font-size: 3.55428571em;
+}
+
+.katex .sizing.reset-size4.size1,
+.katex .fontsize-ensurer.reset-size4.size1 {
+  font-size: 0.625em;
+}
+
+.katex .sizing.reset-size4.size2,
+.katex .fontsize-ensurer.reset-size4.size2 {
+  font-size: 0.75em;
+}
+
+.katex .sizing.reset-size4.size3,
+.katex .fontsize-ensurer.reset-size4.size3 {
+  font-size: 0.875em;
+}
+
+.katex .sizing.reset-size4.size4,
+.katex .fontsize-ensurer.reset-size4.size4 {
+  font-size: 1em;
+}
+
+.katex .sizing.reset-size4.size5,
+.katex .fontsize-ensurer.reset-size4.size5 {
+  font-size: 1.125em;
+}
+
+.katex .sizing.reset-size4.size6,
+.katex .fontsize-ensurer.reset-size4.size6 {
+  font-size: 1.25em;
+}
+
+.katex .sizing.reset-size4.size7,
+.katex .fontsize-ensurer.reset-size4.size7 {
+  font-size: 1.5em;
+}
+
+.katex .sizing.reset-size4.size8,
+.katex .fontsize-ensurer.reset-size4.size8 {
+  font-size: 1.8em;
+}
+
+.katex .sizing.reset-size4.size9,
+.katex .fontsize-ensurer.reset-size4.size9 {
+  font-size: 2.16em;
+}
+
+.katex .sizing.reset-size4.size10,
+.katex .fontsize-ensurer.reset-size4.size10 {
+  font-size: 2.5925em;
+}
+
+.katex .sizing.reset-size4.size11,
+.katex .fontsize-ensurer.reset-size4.size11 {
+  font-size: 3.11em;
+}
+
+.katex .sizing.reset-size5.size1,
+.katex .fontsize-ensurer.reset-size5.size1 {
+  font-size: 0.55555556em;
+}
+
+.katex .sizing.reset-size5.size2,
+.katex .fontsize-ensurer.reset-size5.size2 {
+  font-size: 0.66666667em;
+}
+
+.katex .sizing.reset-size5.size3,
+.katex .fontsize-ensurer.reset-size5.size3 {
+  font-size: 0.77777778em;
+}
+
+.katex .sizing.reset-size5.size4,
+.katex .fontsize-ensurer.reset-size5.size4 {
+  font-size: 0.88888889em;
+}
+
+.katex .sizing.reset-size5.size5,
+.katex .fontsize-ensurer.reset-size5.size5 {
+  font-size: 1em;
+}
+
+.katex .sizing.reset-size5.size6,
+.katex .fontsize-ensurer.reset-size5.size6 {
+  font-size: 1.11111111em;
+}
+
+.katex .sizing.reset-size5.size7,
+.katex .fontsize-ensurer.reset-size5.size7 {
+  font-size: 1.33333333em;
+}
+
+.katex .sizing.reset-size5.size8,
+.katex .fontsize-ensurer.reset-size5.size8 {
+  font-size: 1.6em;
+}
+
+.katex .sizing.reset-size5.size9,
+.katex .fontsize-ensurer.reset-size5.size9 {
+  font-size: 1.92em;
+}
+
+.katex .sizing.reset-size5.size10,
+.katex .fontsize-ensurer.reset-size5.size10 {
+  font-size: 2.30444444em;
+}
+
+.katex .sizing.reset-size5.size11,
+.katex .fontsize-ensurer.reset-size5.size11 {
+  font-size: 2.76444444em;
+}
+
+.katex .sizing.reset-size6.size1,
+.katex .fontsize-ensurer.reset-size6.size1 {
+  font-size: 0.5em;
+}
+
+.katex .sizing.reset-size6.size2,
+.katex .fontsize-ensurer.reset-size6.size2 {
+  font-size: 0.6em;
+}
+
+.katex .sizing.reset-size6.size3,
+.katex .fontsize-ensurer.reset-size6.size3 {
+  font-size: 0.7em;
+}
+
+.katex .sizing.reset-size6.size4,
+.katex .fontsize-ensurer.reset-size6.size4 {
+  font-size: 0.8em;
+}
+
+.katex .sizing.reset-size6.size5,
+.katex .fontsize-ensurer.reset-size6.size5 {
+  font-size: 0.9em;
+}
+
+.katex .sizing.reset-size6.size6,
+.katex .fontsize-ensurer.reset-size6.size6 {
+  font-size: 1em;
+}
+
+.katex .sizing.reset-size6.size7,
+.katex .fontsize-ensurer.reset-size6.size7 {
+  font-size: 1.2em;
+}
+
+.katex .sizing.reset-size6.size8,
+.katex .fontsize-ensurer.reset-size6.size8 {
+  font-size: 1.44em;
+}
+
+.katex .sizing.reset-size6.size9,
+.katex .fontsize-ensurer.reset-size6.size9 {
+  font-size: 1.728em;
+}
+
+.katex .sizing.reset-size6.size10,
+.katex .fontsize-ensurer.reset-size6.size10 {
+  font-size: 2.074em;
+}
+
+.katex .sizing.reset-size6.size11,
+.katex .fontsize-ensurer.reset-size6.size11 {
+  font-size: 2.488em;
+}
+
+.katex .sizing.reset-size7.size1,
+.katex .fontsize-ensurer.reset-size7.size1 {
+  font-size: 0.41666667em;
+}
+
+.katex .sizing.reset-size7.size2,
+.katex .fontsize-ensurer.reset-size7.size2 {
+  font-size: 0.5em;
+}
+
+.katex .sizing.reset-size7.size3,
+.katex .fontsize-ensurer.reset-size7.size3 {
+  font-size: 0.58333333em;
+}
+
+.katex .sizing.reset-size7.size4,
+.katex .fontsize-ensurer.reset-size7.size4 {
+  font-size: 0.66666667em;
+}
+
+.katex .sizing.reset-size7.size5,
+.katex .fontsize-ensurer.reset-size7.size5 {
+  font-size: 0.75em;
+}
+
+.katex .sizing.reset-size7.size6,
+.katex .fontsize-ensurer.reset-size7.size6 {
+  font-size: 0.83333333em;
+}
+
+.katex .sizing.reset-size7.size7,
+.katex .fontsize-ensurer.reset-size7.size7 {
+  font-size: 1em;
+}
+
+.katex .sizing.reset-size7.size8,
+.katex .fontsize-ensurer.reset-size7.size8 {
+  font-size: 1.2em;
+}
+
+.katex .sizing.reset-size7.size9,
+.katex .fontsize-ensurer.reset-size7.size9 {
+  font-size: 1.44em;
+}
+
+.katex .sizing.reset-size7.size10,
+.katex .fontsize-ensurer.reset-size7.size10 {
+  font-size: 1.72833333em;
+}
+
+.katex .sizing.reset-size7.size11,
+.katex .fontsize-ensurer.reset-size7.size11 {
+  font-size: 2.07333333em;
+}
+
+.katex .sizing.reset-size8.size1,
+.katex .fontsize-ensurer.reset-size8.size1 {
+  font-size: 0.34722222em;
+}
+
+.katex .sizing.reset-size8.size2,
+.katex .fontsize-ensurer.reset-size8.size2 {
+  font-size: 0.41666667em;
+}
+
+.katex .sizing.reset-size8.size3,
+.katex .fontsize-ensurer.reset-size8.size3 {
+  font-size: 0.48611111em;
+}
+
+.katex .sizing.reset-size8.size4,
+.katex .fontsize-ensurer.reset-size8.size4 {
+  font-size: 0.55555556em;
+}
+
+.katex .sizing.reset-size8.size5,
+.katex .fontsize-ensurer.reset-size8.size5 {
+  font-size: 0.625em;
+}
+
+.katex .sizing.reset-size8.size6,
+.katex .fontsize-ensurer.reset-size8.size6 {
+  font-size: 0.69444444em;
+}
+
+.katex .sizing.reset-size8.size7,
+.katex .fontsize-ensurer.reset-size8.size7 {
+  font-size: 0.83333333em;
+}
+
+.katex .sizing.reset-size8.size8,
+.katex .fontsize-ensurer.reset-size8.size8 {
+  font-size: 1em;
+}
+
+.katex .sizing.reset-size8.size9,
+.katex .fontsize-ensurer.reset-size8.size9 {
+  font-size: 1.2em;
+}
+
+.katex .sizing.reset-size8.size10,
+.katex .fontsize-ensurer.reset-size8.size10 {
+  font-size: 1.44027778em;
+}
+
+.katex .sizing.reset-size8.size11,
+.katex .fontsize-ensurer.reset-size8.size11 {
+  font-size: 1.72777778em;
+}
+
+.katex .sizing.reset-size9.size1,
+.katex .fontsize-ensurer.reset-size9.size1 {
+  font-size: 0.28935185em;
+}
+
+.katex .sizing.reset-size9.size2,
+.katex .fontsize-ensurer.reset-size9.size2 {
+  font-size: 0.34722222em;
+}
+
+.katex .sizing.reset-size9.size3,
+.katex .fontsize-ensurer.reset-size9.size3 {
+  font-size: 0.40509259em;
+}
+
+.katex .sizing.reset-size9.size4,
+.katex .fontsize-ensurer.reset-size9.size4 {
+  font-size: 0.46296296em;
+}
+
+.katex .sizing.reset-size9.size5,
+.katex .fontsize-ensurer.reset-size9.size5 {
+  font-size: 0.52083333em;
+}
+
+.katex .sizing.reset-size9.size6,
+.katex .fontsize-ensurer.reset-size9.size6 {
+  font-size: 0.5787037em;
+}
+
+.katex .sizing.reset-size9.size7,
+.katex .fontsize-ensurer.reset-size9.size7 {
+  font-size: 0.69444444em;
+}
+
+.katex .sizing.reset-size9.size8,
+.katex .fontsize-ensurer.reset-size9.size8 {
+  font-size: 0.83333333em;
+}
+
+.katex .sizing.reset-size9.size9,
+.katex .fontsize-ensurer.reset-size9.size9 {
+  font-size: 1em;
+}
+
+.katex .sizing.reset-size9.size10,
+.katex .fontsize-ensurer.reset-size9.size10 {
+  font-size: 1.20023148em;
+}
+
+.katex .sizing.reset-size9.size11,
+.katex .fontsize-ensurer.reset-size9.size11 {
+  font-size: 1.43981481em;
+}
+
+.katex .sizing.reset-size10.size1,
+.katex .fontsize-ensurer.reset-size10.size1 {
+  font-size: 0.24108004em;
+}
+
+.katex .sizing.reset-size10.size2,
+.katex .fontsize-ensurer.reset-size10.size2 {
+  font-size: 0.28929605em;
+}
+
+.katex .sizing.reset-size10.size3,
+.katex .fontsize-ensurer.reset-size10.size3 {
+  font-size: 0.33751205em;
+}
+
+.katex .sizing.reset-size10.size4,
+.katex .fontsize-ensurer.reset-size10.size4 {
+  font-size: 0.38572806em;
+}
+
+.katex .sizing.reset-size10.size5,
+.katex .fontsize-ensurer.reset-size10.size5 {
+  font-size: 0.43394407em;
+}
+
+.katex .sizing.reset-size10.size6,
+.katex .fontsize-ensurer.reset-size10.size6 {
+  font-size: 0.48216008em;
+}
+
+.katex .sizing.reset-size10.size7,
+.katex .fontsize-ensurer.reset-size10.size7 {
+  font-size: 0.57859209em;
+}
+
+.katex .sizing.reset-size10.size8,
+.katex .fontsize-ensurer.reset-size10.size8 {
+  font-size: 0.69431051em;
+}
+
+.katex .sizing.reset-size10.size9,
+.katex .fontsize-ensurer.reset-size10.size9 {
+  font-size: 0.83317261em;
+}
+
+.katex .sizing.reset-size10.size10,
+.katex .fontsize-ensurer.reset-size10.size10 {
+  font-size: 1em;
+}
+
+.katex .sizing.reset-size10.size11,
+.katex .fontsize-ensurer.reset-size10.size11 {
+  font-size: 1.19961427em;
+}
+
+.katex .sizing.reset-size11.size1,
+.katex .fontsize-ensurer.reset-size11.size1 {
+  font-size: 0.20096463em;
+}
+
+.katex .sizing.reset-size11.size2,
+.katex .fontsize-ensurer.reset-size11.size2 {
+  font-size: 0.24115756em;
+}
+
+.katex .sizing.reset-size11.size3,
+.katex .fontsize-ensurer.reset-size11.size3 {
+  font-size: 0.28135048em;
+}
+
+.katex .sizing.reset-size11.size4,
+.katex .fontsize-ensurer.reset-size11.size4 {
+  font-size: 0.32154341em;
+}
+
+.katex .sizing.reset-size11.size5,
+.katex .fontsize-ensurer.reset-size11.size5 {
+  font-size: 0.36173633em;
+}
+
+.katex .sizing.reset-size11.size6,
+.katex .fontsize-ensurer.reset-size11.size6 {
+  font-size: 0.40192926em;
+}
+
+.katex .sizing.reset-size11.size7,
+.katex .fontsize-ensurer.reset-size11.size7 {
+  font-size: 0.48231511em;
+}
+
+.katex .sizing.reset-size11.size8,
+.katex .fontsize-ensurer.reset-size11.size8 {
+  font-size: 0.57877814em;
+}
+
+.katex .sizing.reset-size11.size9,
+.katex .fontsize-ensurer.reset-size11.size9 {
+  font-size: 0.69453376em;
+}
+
+.katex .sizing.reset-size11.size10,
+.katex .fontsize-ensurer.reset-size11.size10 {
+  font-size: 0.83360129em;
+}
+
+.katex .sizing.reset-size11.size11,
+.katex .fontsize-ensurer.reset-size11.size11 {
+  font-size: 1em;
+}
+
+.katex .delimsizing.size1 {
+  font-family: KaTeX_Size1;
+}
+
+.katex .delimsizing.size2 {
+  font-family: KaTeX_Size2;
+}
+
+.katex .delimsizing.size3 {
+  font-family: KaTeX_Size3;
+}
+
+.katex .delimsizing.size4 {
+  font-family: KaTeX_Size4;
+}
+
+.katex .delimsizing.mult .delim-size1 > span {
+  font-family: KaTeX_Size1;
+}
+
+.katex .delimsizing.mult .delim-size4 > span {
+  font-family: KaTeX_Size4;
+}
+
+.katex .nulldelimiter {
+  display: inline-block;
+  width: 0.12em;
+}
+
+.katex .delimcenter {
+  position: relative;
+}
+
+.katex .op-symbol {
+  position: relative;
+}
+
+.katex .op-symbol.small-op {
+  font-family: KaTeX_Size1;
+}
+
+.katex .op-symbol.large-op {
+  font-family: KaTeX_Size2;
+}
+
+.katex .op-limits > .vlist-t {
+  text-align: center;
+}
+
+.katex .accent > .vlist-t {
+  text-align: center;
+}
+
+.katex .accent .accent-body {
+  width: 0;
+  position: relative;
+}
+
+.katex .overlay {
+  display: block;
+}
+
+.katex .mtable .vertical-separator {
+  display: inline-block;
+  margin: 0 -0.125em;
+  width: 0.25em;
+}
+
+.katex .mtable .arraycolsep {
+  display: inline-block;
+}
+
+.katex .mtable .col-align-c > .vlist-t {
+  text-align: center;
+}
+
+.katex .mtable .col-align-l > .vlist-t {
+  text-align: left;
+}
+
+.katex .mtable .col-align-r > .vlist-t {
+  text-align: right;
+}
+
+.katex .svg-align {
+  text-align: left;
+}
+
+.katex svg {
+  display: block;
+  position: absolute;
+  width: 100%;
+  fill: currentColor;
+  stroke: currentColor;
+  fill-rule: nonzero;
+  fill-opacity: 1;
+  stroke-width: 1;
+  stroke-linecap: butt;
+  stroke-linejoin: miter;
+  stroke-miterlimit: 4;
+  stroke-dasharray: none;
+  stroke-dashoffset: 0;
+  stroke-opacity: 1;
+}
+
+.katex svg path {
+  stroke: none;
+}
+
+.katex .vertical-separator svg {
+  width: 0.25em;
+}
+
+.katex .stretchy {
+  width: 100%;
+  display: block;
+}
+
+.katex .stretchy:before,
+.katex .stretchy:after {
+  content: "";
+}
+
+.katex .hide-tail {
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.katex .halfarrow-left {
+  position: absolute;
+  left: 0;
+  width: 50.1%;
+  overflow: hidden;
+}
+
+.katex .halfarrow-right {
+  position: absolute;
+  right: 0;
+  width: 50%;
+  overflow: hidden;
+}
+
+.katex .brace-left {
+  position: absolute;
+  left: 0;
+  width: 25.1%;
+  overflow: hidden;
+}
+
+.katex .brace-center {
+  position: absolute;
+  left: 25%;
+  width: 50%;
+  overflow: hidden;
+}
+
+.katex .brace-right {
+  position: absolute;
+  right: 0;
+  width: 25.1%;
+  overflow: hidden;
+}
+
+.katex .x-arrow-pad {
+  padding: 0 0.5em;
+}
+
+.katex .x-arrow,
+.katex .mover,
+.katex .munder {
+  text-align: center;
+}
+
+.katex .boxpad {
+  padding: 0 0.3em 0 0.3em;
+}
+
+.katex .fbox {
+  box-sizing: border-box;
+  border: 0.04em solid black;
+}
+
+.katex .fcolorbox {
+  box-sizing: border-box;
+  border: 0.04em solid;
+}
+
+.katex .cancel-pad {
+  padding: 0 0.2em 0 0.2em;
+}
+
+.katex .mord + .cancel-lap,
+.katex .mbin + .cancel-lap {
+  margin-left: -0.2em;
+}
+
+.katex .cancel-lap + .mord,
+.katex .cancel-lap + .mbin,
+.katex .cancel-lap + .msupsub {
+  margin-left: -0.2em;
+}
+
+.katex .sout {
+  border-bottom-style: solid;
+  border-bottom-width: 0.08em;
+}</style><style type="text/css">
+.book-chapters-modal .v-modal {
+  width: 625px;
+  height: 500px;
+}
+</style><style type="text/css">
+@charset "UTF-8";
+/*
+ * 变量
+*/
+.v-modal-wrap {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  background-color: transparent;
+}
+.v-modal-wrap.modal-leave-active {
+    -webkit-transition: opacity 0.3s;
+    -o-transition: opacity 0.3s;
+    transition: opacity 0.3s;
+}
+.v-modal-wrap.modal-enter-active .v-modal-mask, .v-modal-wrap.modal-leave-active .v-modal-mask {
+    opacity: 0;
+}
+.v-modal-wrap.modal-enter-active .v-modal, .v-modal-wrap.modal-leave-active .v-modal {
+    -webkit-transform: translate(-50%, -70%);
+        -ms-transform: translate(-50%, -70%);
+            transform: translate(-50%, -70%);
+    opacity: 0;
+}
+.v-modal-wrap .v-modal-mask {
+    background-color: rgba(255, 255, 255, 0.7);
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    -webkit-transition: opacity 0.3s;
+    -o-transition: opacity 0.3s;
+    transition: opacity 0.3s;
+    opacity: 1;
+}
+.v-modal-wrap .v-modal {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    -webkit-transform: translate(-50%, -50%);
+        -ms-transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%);
+    border-radius: 6px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+    -webkit-box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
+    -webkit-transition: opacity 0.3s, -webkit-transform 0.3s;
+    transition: opacity 0.3s, -webkit-transform 0.3s;
+    -o-transition: opacity 0.3s, transform 0.3s;
+    transition: opacity 0.3s, transform 0.3s;
+    transition: opacity 0.3s, transform 0.3s, -webkit-transform 0.3s;
+    opacity: 1;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    overflow: hidden;
+}
+.v-modal-wrap .v-modal > header:before, .v-modal-wrap .v-modal > header:after, .v-modal-wrap .v-modal > main:before, .v-modal-wrap .v-modal > main:after, .v-modal-wrap .v-modal > footer:before, .v-modal-wrap .v-modal > footer:after {
+      content: '';
+      clear: both;
+      display: table;
+}
+.v-modal-wrap .v-modal > header {
+      padding: 20px;
+      border-bottom: 1px solid #F0F0F0;
+}
+.v-modal-wrap .v-modal > header h4 {
+        margin: 0;
+        color: #333;
+        text-align: left;
+}
+.v-modal-wrap .v-modal .close {
+      position: absolute;
+      right: 16px;
+      top: 20px;
+      font-size: 26px;
+      line-height: 20px;
+      color: rgba(0, 0, 0, 0.8);
+}
+.v-modal-wrap .v-modal .close:hover {
+        color: #000000;
+}
+.v-modal-wrap .v-modal > main {
+      padding: 20px 20px 20px 20px;
+      font-size: 15px;
+      color: #333;
+      -webkit-box-flex: 1;
+      -webkit-flex-grow: 1;
+          -ms-flex-positive: 1;
+              flex-grow: 1;
+      overflow-x: hidden;
+      overflow-y: auto;
+}
+.v-modal-wrap .v-modal > footer {
+      padding: 20px;
+      background-color: #fff;
+}
+.v-modal-wrap .v-modal > footer button {
+        padding: 0;
+        margin: 0;
+        background-color: transparent;
+        border: 0;
+        float: right;
+}
+.v-modal-wrap .v-modal > footer button:focus {
+          outline: 0;
+}
+.v-modal-wrap .v-modal > footer .submit {
+        padding: 4px 12px;
+        border: 1px solid;
+        border-radius: 20px;
+}
+.v-modal-wrap .v-modal > footer .cancel {
+        margin-top: 5px;
+}
+.v-modal-wrap .v-modal > footer .cancel:hover {
+          color: #333333;
+}
+.reader-night-mode .v-modal-wrap .v-modal-mask {
+  background-color: rgba(63, 63, 63, 0.7);
+}
+.reader-night-mode .v-modal-wrap .v-modal {
+  background-color: #3f3f3f;
+}
+.reader-night-mode .v-modal-wrap .v-modal header {
+    border-color: #2F2F2F;
+}
+.reader-night-mode .v-modal-wrap .v-modal header h4 {
+      color: #C8C8C8;
+}
+.reader-night-mode .v-modal-wrap .v-modal .close {
+    color: #C8C8C8;
+}
+.reader-night-mode .v-modal-wrap .v-modal .close:hover {
+      color: #ffffff;
+}
+.reader-night-mode .v-modal-wrap .v-modal main {
+    color: #C8C8C8;
+}
+.reader-night-mode .v-modal-wrap .v-modal footer {
+    background-color: #3f3f3f;
+}
+.reader-night-mode .v-modal-wrap .v-modal footer .cancel:hover {
+      color: #C8C8C8;
+}
+</style><style type="text/css">
+#free-reward-panel .reward-users-modal main {
+  padding: 0;
+}
+</style><style type="text/css">
+@charset "UTF-8";
+/*
+ * 变量
+*/
+.reward-note-modal .v-modal {
+  width: 620px;
+  text-align: center;
+}
+.reward-note-modal .v-modal form {
+    margin: 0 auto 25px auto;
+    padding: 0 40px;
+}
+.reward-note-modal .v-modal .reward-intro {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    font-size: 16px;
+}
+.reward-note-modal .v-modal .reward-intro .avatar {
+      cursor: default !important;
+      width: 36px;
+      height: 36px;
+      margin-right: 10px;
+      display: inline-block;
+}
+.reward-note-modal .v-modal .reward-intro .intro {
+      margin-right: 5px;
+      font-weight: bold;
+      vertical-align: middle;
+}
+.reward-note-modal .v-modal .reward-intro i {
+      color: #EA6F5A;
+      vertical-align: middle;
+}
+.reward-note-modal .v-modal .main-inputs {
+    margin: 25px 0;
+}
+.reward-note-modal .v-modal .main-inputs .amount-group {
+      margin: 0 -5px;
+}
+.reward-note-modal .v-modal .main-inputs .amount-group input {
+        display: none;
+}
+.reward-note-modal .v-modal .main-inputs .amount-group input:checked + .option {
+        color: #EA6F5A;
+        border-color: #EA6F5A;
+}
+.reward-note-modal .v-modal .main-inputs .amount-group .custom-amount:checked + .option .custom-text {
+        opacity: 0;
+}
+.reward-note-modal .v-modal .main-inputs .amount-group .custom-amount:checked + .option .custom-amount-input {
+        opacity: 1;
+}
+.reward-note-modal .v-modal .main-inputs .amount-group .option {
+        position: relative;
+        margin: 0 5px 15px;
+        width: 156px;
+        height: 56px;
+        line-height: 54px;
+        border: 1px solid #E6E6E6;
+        border-radius: 4px;
+        font-weight: normal;
+        color: #999999;
+        cursor: pointer;
+}
+.reward-note-modal .v-modal .main-inputs .amount-group .option i {
+          font-size: 16px;
+          vertical-align: middle;
+}
+.reward-note-modal .v-modal .main-inputs .amount-group .option .amount {
+          font-size: 28px;
+          vertical-align: middle;
+}
+.reward-note-modal .v-modal .main-inputs .amount-group .option .piece {
+          font-size: 13px;
+          vertical-align: sub;
+}
+.reward-note-modal .v-modal .main-inputs .amount-group .option .custom-amount-input {
+          position: absolute;
+          top: 0;
+          z-index: -1;
+          width: 100%;
+          opacity: 0;
+}
+.reward-note-modal .v-modal .main-inputs .amount-group .option .custom-amount-input i {
+            position: absolute;
+            top: 0;
+            left: 10px;
+}
+.reward-note-modal .v-modal .main-inputs .amount-group .option .custom-amount-input .piece {
+            position: absolute;
+            top: 4px;
+            right: 10px;
+}
+.reward-note-modal .v-modal .main-inputs .amount-group .option .custom-amount-input input {
+            display: block;
+            margin: 0 auto;
+            width: 80px;
+            height: 54px;
+            line-height: 54px;
+            border: none;
+            font-size: 28px;
+            text-align: center;
+            background: transparent;
+            -moz-appearance: textfield;
+}
+.reward-note-modal .v-modal .main-inputs .amount-group .option .custom-amount-input input::-webkit-outer-spin-button, .reward-note-modal .v-modal .main-inputs .amount-group .option .custom-amount-input input::-webkit-inner-spin-button {
+              -webkit-appearance: none !important;
+}
+.reward-note-modal .v-modal .main-inputs .message {
+      padding: 15px 20px;
+      margin-bottom: 0;
+      font-size: 14px;
+      border: 1px solid #E6E6E6;
+      color: #333333;
+      border-radius: 4px;
+      background-color: rgba(180, 180, 180, 0.1);
+}
+.reward-note-modal .v-modal .main-inputs .message textarea {
+        width: 100%;
+        height: 44px;
+        padding: 0;
+        margin: 0;
+        resize: none;
+        background: none !important;
+        border: none !important;
+        -webkit-box-sizing: border-box;
+                box-sizing: border-box;
+        -webkit-box-shadow: none;
+                box-shadow: none;
+}
+.reward-note-modal .v-modal .main-inputs .message textarea:focus {
+          outline: none;
+}
+.reward-note-modal .v-modal .reward-info .amount {
+    font-size: 28px;
+    font-weight: bold;
+    color: #EA6F5A;
+}
+.reward-note-modal .v-modal .reward-info .pay-method {
+    font-size: 14px;
+}
+.reward-note-modal .v-modal .reward-info .pay-method a {
+      color: #3194D0;
+}
+.reward-note-modal .v-modal .choose-pay {
+    margin: 0 -5px;
+}
+.reward-note-modal .v-modal .choose-pay input {
+      display: none;
+}
+.reward-note-modal .v-modal .choose-pay input:checked + .option {
+      color: #EA6F5A;
+      border-color: #EA6F5A;
+}
+.reward-note-modal .v-modal .choose-pay .option {
+      margin: 20px 5px 10px;
+      width: 156px;
+      height: 56px;
+      line-height: 54px;
+      text-align: center;
+      border: 1px solid #E6E6E6;
+      border-radius: 4px;
+      cursor: pointer;
+}
+.reward-note-modal .v-modal .choose-pay .option img {
+        height: 30px;
+}
+.reward-note-modal .v-modal .choose-pay .option img.day.alipay, .reward-note-modal .v-modal .choose-pay .option img.night.alipay {
+        min-width: 85px;
+}
+.reward-note-modal .v-modal .choose-pay .option img.day.wechat, .reward-note-modal .v-modal .choose-pay .option img.night.wechat {
+        min-width: 112px;
+}
+.reward-note-modal .v-modal .choose-pay .option img.night {
+        display: none;
+}
+.reward-note-modal .v-modal .choose-pay .tooltip {
+      width: 230px;
+}
+.reward-note-modal .v-modal .modal-footer {
+    padding: 0 15px 20px;
+    border: none;
+    background-color: transparent;
+    text-align: center;
+}
+.reward-note-modal .v-modal .modal-footer .btn {
+      padding: 8px 45px;
+      font-size: 24px;
+}
+.reward-note-modal .v-modal .btn-pay {
+    padding: 8px 25px;
+    font-size: 16px;
+    color: #ffffff;
+    background-color: #F5A623;
+}
+.weixin-pay, .success-pay {
+  text-align: center;
+}
+.weixin-pay .v-modal, .success-pay .v-modal {
+    width: 350px;
+}
+.weixin-pay .ic-successed, .success-pay .ic-successed {
+    font-size: 60px;
+    color: #3db922;
+}
+.weixin-pay h2, .weixin-pay h3, .success-pay h2, .success-pay h3 {
+    margin-bottom: 20px;
+    color: #333333;
+}
+.weixin-pay h2, .success-pay h2 {
+    margin: 0 0 40px 0;
+    font-size: 24px;
+}
+.weixin-pay .bind-text, .success-pay .bind-text {
+    position: relative;
+    margin-bottom: 30px;
+    font-size: 14px;
+    color: #999999;
+}
+.weixin-pay .bind-text:before, .weixin-pay .bind-text:after, .success-pay .bind-text:before, .success-pay .bind-text:after {
+      content: "";
+      border-top: 1px solid #999;
+      display: block;
+      position: absolute;
+      width: 40px;
+      top: 8px;
+}
+.weixin-pay .bind-text:before, .success-pay .bind-text:before {
+      left: 30px;
+}
+.weixin-pay .bind-text:after, .success-pay .bind-text:after {
+      right: 30px;
+}
+.weixin-pay .share-bind, .success-pay .share-bind {
+    display: block;
+    margin-bottom: 30px;
+}
+.weixin-pay .share-bind i, .success-pay .share-bind i {
+      margin-right: 4px;
+      font-size: 22px;
+      vertical-align: middle;
+}
+.weixin-pay .share-bind.wechat i, .success-pay .share-bind.wechat i {
+      color: #00BB29;
+}
+.weixin-pay .share-bind.weibo i, .success-pay .share-bind.weibo i {
+      color: #E05244;
+}
+.weixin-pay .wx-qr-code, .success-pay .wx-qr-code {
+    display: inline-block;
+}
+.weixin-pay .wx-qr-code img, .success-pay .wx-qr-code img {
+      margin: 0 auto;
+      padding: 10px;
+      width: 200px;
+      background-color: #ffffff;
+}
+.weixin-pay .pay-amount, .success-pay .pay-amount {
+    margin: 20px 0;
+    color: #787878;
+}
+.weixin-pay .pay-amount span, .success-pay .pay-amount span {
+      color: #F5A623;
+}
+</style><style type="text/css">
+@charset "UTF-8";
+/*
+ * 变量
+*/
+.like[data-v-6ddd02c6] {
+  display: inline-block;
+}
+.like .like-group[data-v-6ddd02c6] {
+    position: relative;
+    padding: 13px 0 15px 0;
+    font-size: 0;
+    border: 1px solid #EA6F5A;
+    border-radius: 40px;
+}
+.like .like-group[data-v-6ddd02c6]:hover {
+      background-color: rgba(236, 97, 73, 0.05);
+}
+.like .like-group .btn-like[data-v-6ddd02c6] {
+      display: inline-block;
+      font-size: 19px;
+}
+.like .like-group .btn-like[data-v-6ddd02c6]:before {
+        content: '';
+        position: absolute;
+        left: 12px;
+        top: 2px;
+        width: 50px;
+        height: 50px;
+        background-image: url(//cdn2.jianshu.io/assets/web/like_animation_steps-62a00a7b52377d3069927cdb8e61fd34.png);
+        background-position: left;
+        background-repeat: no-repeat;
+        background-size: 1000px 50px;
+}
+.like .like-group .btn-like a[data-v-6ddd02c6] {
+        position: relative;
+        padding: 18px 30px 18px 55px;
+        color: #EA6F5A;
+}
+.like .like-group .modal-wrap[data-v-6ddd02c6] {
+      font-size: 18px;
+      border-left: 1px solid rgba(236, 97, 73, 0.4);
+      display: inline-block;
+      margin-left: -15px;
+}
+.like .like-group .modal-wrap a[data-v-6ddd02c6] {
+        color: #EA6F5A;
+        padding: 18px 26px 18px 18px;
+}
+.like .like-group.like-animation[data-v-6ddd02c6], .like .like-group.active[data-v-6ddd02c6] {
+      background-color: #EA6F5A;
+}
+.like .like-group.like-animation .btn-like a[data-v-6ddd02c6], .like .like-group.active .btn-like a[data-v-6ddd02c6] {
+        color: white;
+}
+.like .like-group.like-animation .modal-wrap[data-v-6ddd02c6], .like .like-group.active .modal-wrap[data-v-6ddd02c6] {
+        border-left: 1px solid white;
+}
+.like .like-group.like-animation .modal-wrap a[data-v-6ddd02c6], .like .like-group.active .modal-wrap a[data-v-6ddd02c6] {
+          color: white;
+}
+.like .like-group.like-animation .btn-like[data-v-6ddd02c6]:before {
+      -webkit-animation: likeBlast-data-v-6ddd02c6 0.6s 1 steps(19);
+              animation: likeBlast-data-v-6ddd02c6 0.6s 1 steps(19);
+      background-position: right;
+}
+@-webkit-keyframes likeBlast {
+0% {
+    background-position: left;
+}
+100% {
+    background-position: right;
+}
+}
+@keyframes likeBlast-data-v-6ddd02c6 {
+0% {
+    background-position: left;
+}
+100% {
+    background-position: right;
+}
+}
+.like .like-group.active .btn-like[data-v-6ddd02c6]:before {
+      background-position: right;
+}
+</style><style type="text/css">
+@charset "UTF-8";
+/*
+ * 变量
+*/
+.main {
+  position: relative;
+  margin: 0 auto;
+  padding: 0 0 30px 0;
+  width: 620px;
+}
+.main .title {
+    padding-left: 8px;
+    border-left: 3px solid #EA6F5A;
+    line-height: 1;
+    font-size: 15px;
+}
+.main .collection-settings {
+    position: absolute;
+    top: 2px;
+    right: 0;
+    font-size: 13px;
+    color: #A0A0A0;
+}
+.main .collection-settings span {
+      padding-left: 4px;
+}
+.main .include-collection {
+    width: 100%;
+    padding-top: 20px;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+            flex-direction: row;
+    -webkit-box-pack: start;
+    -webkit-justify-content: flex-start;
+        -ms-flex-pack: start;
+            justify-content: flex-start;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+        -ms-flex-align: center;
+            align-items: center;
+    -webkit-flex-wrap: wrap;
+        -ms-flex-wrap: wrap;
+            flex-wrap: wrap;
+}
+.main .include-collection .item {
+      display: inline-block;
+      margin: 0 12px 12px 0;
+      min-height: 32px;
+      background-color: white;
+      border: 1px solid #DCDCDC;
+      border-radius: 4px;
+      vertical-align: top;
+      overflow: hidden;
+}
+.main .include-collection .item img {
+        width: 32px;
+        height: 32px;
+}
+.main .include-collection .item .name {
+        display: inline-block;
+        padding: 0 10px;
+        font-size: 14px;
+}
+.main .include-collection .add-collection-wrap {
+      margin: 0 12px 12px 0;
+}
+.main .include-collection .add-collection {
+      padding: 8px 12px;
+      font-size: 14px;
+      border: 1px solid #DCDCDC;
+      border-radius: 4px;
+}
+.main .include-collection .add-collection i {
+        margin-right: 4px;
+        color: #969696;
+}
+.main .recommend-note a {
+    position: relative;
+    margin: 20px 2px 0 0;
+    width: 200px;
+    height: 160px;
+    display: inline-block;
+}
+.main .recommend-note a:after {
+      content: "";
+      position: absolute;
+      width: 200px;
+      height: 160px;
+      border-radius: 0 0 4px 4px;
+      -webkit-box-shadow: inset 0px -80px 50px -22px rgba(0, 0, 0, 0.6);
+              box-shadow: inset 0px -80px 50px -22px rgba(0, 0, 0, 0.6);
+      top: 0;
+      left: 0;
+      z-index: 1;
+}
+.main .recommend-note .name {
+    position: absolute;
+    bottom: 40px;
+    left: 10px;
+    right: 10px;
+    font-size: 17px;
+    font-weight: bold;
+    color: #ffffff;
+    z-index: 2;
+}
+.main .recommend-note .author {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    z-index: 2;
+}
+.main .recommend-note .avatar {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+}
+.main .recommend-note .avatar img {
+      border-radius: 50%;
+}
+.main .recommend-note .author-name {
+    font-size: 12px;
+    color: #ffffff;
+    display: inline-block;
+    vertical-align: -1px;
+}
+.main .show-more {
+    margin: 0 12px 12px 0;
+    font-size: 14px;
+    color: #A0A0A0;
+}
+</style></head>
+
+  <body lang="zh-CN" class="reader-black-font">
+    <!-- 全局顶部导航栏 -->
+<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+  <div class="width-limit">
+    <!-- 左上方 Logo -->
+    <a class="logo" href="https://www.jianshu.com/"><img src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/nav-logo-4c7bbafe27adc892f3046e6978459bac.png" alt="Nav logo"></a>
+
+    <!-- 右上角 -->
+      <!-- 未登录显示登录/注册/写文章 -->
+      <a class="btn write-btn" target="_blank" href="https://www.jianshu.com/writer#/">
+        <i class="iconfont ic-write"></i>写文章
+</a>      <a class="btn sign-up" href="https://www.jianshu.com/sign_up">注册</a>
+      <a class="btn log-in" href="https://www.jianshu.com/sign_in">登录</a>
+
+    <!-- 如果用户登录，显示下拉菜单 -->
+
+    <div class="style-mode"><a class="style-mode-btn"><i class="iconfont ic-navigation-mode"></i></a> <div class="popover-modal" style="left: 0px; display: none;"><div class="meta"><i class="iconfont ic-navigation-night"></i><span>夜间模式</span></div> <div class="switch day-night-group"><a class="switch-btn">开</a> <a class="switch-btn active">关</a></div> <hr> <div class="switch font-family-group"><a class="switch-btn font-song">宋体</a> <a class="switch-btn font-hei active">黑体</a></div> <div class="switch"><a class="switch-btn active">简</a> <a class="switch-btn">繁</a></div></div></div>
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#menu" aria-expanded="false">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+      </div>
+      <div class="collapse navbar-collapse" id="menu">
+        <ul class="nav navbar-nav">
+            <li class="tab ">
+              <a href="https://www.jianshu.com/">
+                <span class="menu-text">首页</span><i class="iconfont ic-navigation-discover menu-icon"></i>
+</a>            </li>
+            <li class="tab ">
+              <a id="web-nav-app-download-btn" class="app-download-btn" href="https://www.jianshu.com/apps?utm_medium=desktop&amp;utm_source=navbar-apps"><span class="menu-text">下载App</span><i class="iconfont ic-navigation-download menu-icon"></i></a>
+            </li>
+          <li class="search">
+            <form target="_blank" action="https://www.jianshu.com/search" accept-charset="UTF-8" method="get"><input name="utf8" type="hidden" value="✓">
+              <input type="text" name="q" id="q" value="" autocomplete="off" placeholder="搜索" class="search-input">
+              <a class="search-btn" href="javascript:void(null)"><i class="iconfont ic-search"></i></a>
+</form>          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</nav>
+
+    
+<div class="note">
+  <a target="_blank" href="https://www.jianshu.com/apps/download?utm_source=sbc" id="web-note-ad-fixed" style="left: 1139.5px; display: inline;"><span class="close">×</span></a>
+  <div class="post">
+    <div class="article">
+        <h1 class="title">Android事件分发机制详解：史上最全面、最易懂</h1>
+
+        <!-- 作者区域 -->
+        <div class="author">
+          <a class="avatar" href="https://www.jianshu.com/u/383970bef0a0">
+            <img src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/e32cb66f99ea" alt="96">
+</a>          <div class="info">
+            <span class="name"><a href="https://www.jianshu.com/u/383970bef0a0">Carson_Ho</a></span>
+              <img class="badge-icon" data-toggle="tooltip" title="" src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/595a1b60-08f6-4beb-998f-2bf55e230555" alt="595a1b60 08f6 4beb 998f 2bf55e230555" data-original-title="简书程序员优秀作者">
+            <!-- 关注用户按钮 -->
+            <a class="btn btn-success follow"><i class="iconfont ic-follow"></i><span>关注</span></a>
+            <!-- 文章数据信息 -->
+            <div class="meta">
+              <!-- 如果文章更新时间大于发布时间，那么使用 tooltip 显示更新时间 -->
+                <span class="publish-time" data-toggle="tooltip" data-placement="bottom" title="" data-original-title="最后编辑于 2018.03.12 17:13">2017.01.06 11:20*</span>
+              <span class="wordage">字数 3440</span>
+            <span class="views-count">阅读 37221</span><span class="comments-count">评论 123</span><span class="likes-count">喜欢 754</span><span class="rewards-count ">赞赏 11</span></div>
+          </div>
+          <!-- 如果是当前作者，加入编辑按钮 -->
+        </div>
+
+        <!-- 文章内容 -->
+        <div data-note-content="" class="show-content">
+          <div class="show-content-free">
+            <div class="image-package">
+<div class="image-container" style="max-width: 700px; max-height: 716px;">
+<div class="image-container-fill" style="padding-bottom: 102.38000000000001%;"></div>
+<div class="image-view" data-width="840" data-height="860"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-207a738cb165a2da.png" data-original-width="840" data-original-height="860" data-original-format="image/png" data-original-filesize="528657" style="cursor: zoom-in;" class="image-loading"></div>
+</div>
+<div class="image-caption"></div>
+</div>
+<hr>
+<h1>前言</h1>
+<ul>
+<li>
+<code>Android</code>事件分发机制是<code>Android</code>开发者必须了解的基础</li>
+<li>网上有大量关于<code>Android</code>事件分发机制的文章，但存在一些问题：<strong>内容不全、思路不清晰、无源码分析、简单问题复杂化等等</strong>
+</li>
+<li>今天，我将全面总结<code>Android</code>的事件分发机制，我能保证这是<strong>市面上的最全面、最清晰、最易懂的</strong>
+</li>
+</ul>
+<blockquote>
+<ol>
+<li>本文秉着“结论先行、详细分析在后”的原则，即先让大家感性认识，再通过理性分析从而理解问题；</li>
+<li>所以，请各位读者先记住结论，再往下继续看分析；</li>
+</ol>
+</blockquote>
+<ul>
+<li>文章较长，阅读需要较长时间，建议收藏等充足时间再进行阅读</li>
+</ul>
+<hr>
+<h1>目录</h1>
+<div class="image-package">
+<div class="image-container" style="max-width: 700px; max-height: 514px; background-color: transparent;">
+<div class="image-container-fill" style="padding-bottom: 73.52%;"></div>
+<div class="image-view" data-width="1352" data-height="994"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-e7baca065f885271.png" data-original-width="1352" data-original-height="994" data-original-format="image/png" data-original-filesize="158760" style="cursor: zoom-in;" class="" src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/944365-e7baca065f885271.png"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div>
+<hr>
+<h1>1. 基础认知</h1>
+<h3>1.1 事件分发的对象是谁？</h3>
+<p><strong>答：点击事件（<code>Touch</code>事件）</strong></p>
+<ul>
+<li>定义<br>
+当用户触摸屏幕时（<code>View</code> 或 <code>ViewGroup</code>派生的控件），将产生点击事件（<code>Touch</code>事件）</li>
+</ul>
+<blockquote>
+<p><code>Touch</code>事件的相关细节（发生触摸的位置、时间等）被封装成<code>MotionEvent</code>对象</p>
+</blockquote>
+<ul>
+<li>事件类型（4种）</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>事件类型</th>
+<th style="text-align:center">具体动作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MotionEvent.ACTION_DOWN</td>
+<td style="text-align:center">按下View（所有事件的开始）</td>
+</tr>
+<tr>
+<td>MotionEvent.ACTION_UP</td>
+<td style="text-align:center">抬起View（与DOWN对应）</td>
+</tr>
+<tr>
+<td>MotionEvent.ACTION_MOVE</td>
+<td style="text-align:center">滑动View</td>
+</tr>
+<tr>
+<td>MotionEvent.ACTION_CANCEL</td>
+<td style="text-align:center">结束事件（非人为原因）</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>特别说明：事件列<br>
+从手指接触屏幕 至 手指离开屏幕，这个过程产生的一系列事件</li>
+</ul>
+<blockquote>
+<p>注：一般情况下，事件列都是以<code>DOWN</code>事件开始、<code>UP</code>事件结束，中间有无数的MOVE事件，如下图：<br>
+</p>
+<div class="image-package">
+<div class="image-container" style="max-width: 700px; max-height: 180px; background-color: transparent;">
+<div class="image-container-fill" style="padding-bottom: 18.18%;"></div>
+<div class="image-view" data-width="990" data-height="180"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-79b1e86793514e99.png" data-original-width="990" data-original-height="180" data-original-format="image/png" data-original-filesize="18378" style="cursor: zoom-in;" class="" src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/944365-79b1e86793514e99.png"></div>
+</div>
+<div class="image-caption">事件列</div>
+</div>
+<p></p>
+</blockquote>
+<p>即当一个点击事件（<code>MotionEvent</code> ）产生后，系统需把这个事件传递给一个具体的 <code>View</code> 去处理。</p>
+<h3>1.2 事件分发的本质</h3>
+<p><strong>答：将点击事件（MotionEvent）传递到某个具体的<code>View</code> &amp; 处理的整个过程</strong></p>
+<blockquote>
+<p>即 事件传递的过程 = 分发过程。</p>
+</blockquote>
+<h3>1.3 事件在哪些对象之间进行传递？</h3>
+<p><strong>答：Activity、ViewGroup、View</strong></p>
+<ul>
+<li>
+<code>Android</code>的<code>UI</code>界面由<code>Activity</code>、<code>ViewGroup</code>、<code>View</code> 及其派生类组成<br>
+<div class="image-package">
+<div class="image-container" style="max-width: 256px; max-height: 409px; background-color: transparent;">
+<div class="image-container-fill" style="padding-bottom: 159.76999999999998%;"></div>
+<div class="image-view" data-width="256" data-height="409"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-ece40d4524784ffa.png" data-original-width="256" data-original-height="409" data-original-format="image/png" data-original-filesize="20141" style="cursor: zoom-in;" class="" src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/944365-ece40d4524784ffa.png"></div>
+</div>
+<div class="image-caption">UI界面</div>
+</div>
+</li>
+</ul>
+<div class="image-package">
+<div class="image-container" style="max-width: 590px; max-height: 310px; background-color: transparent;">
+<div class="image-container-fill" style="padding-bottom: 52.54%;"></div>
+<div class="image-view" data-width="590" data-height="310"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-02c588300f6ad741.png" data-original-width="590" data-original-height="310" data-original-format="image/png" data-original-filesize="42789" style="cursor: zoom-in;" class="" src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/944365-02c588300f6ad741.png"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div>
+<h3>1.4 事件分发的顺序</h3>
+<p>即 事件传递的顺序：<code>Activity</code> -&gt; <code>ViewGroup</code> -&gt; <code>View</code></p>
+<blockquote>
+<p>即：1个点击事件发生后，事件先传到<code>Activity</code>、再传到<code>ViewGroup</code>、最终再传到 <code>View</code></p>
+</blockquote>
+<div class="image-package">
+<div class="image-container" style="max-width: 505px; max-height: 1018px; background-color: transparent;">
+<div class="image-container-fill" style="padding-bottom: 145.54%;"></div>
+<div class="image-view" data-width="505" data-height="735"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-7fee82bba19a3821.png" data-original-width="505" data-original-height="735" data-original-format="image/png" data-original-filesize="83468" style="cursor: zoom-in;" class="" src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/944365-7fee82bba19a3821.png"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div>
+<h3>1.5 事件分发过程由哪些方法协作完成？</h3>
+<p><strong>答：dispatchTouchEvent() 、onInterceptTouchEvent()和onTouchEvent()</strong></p>
+<div class="image-package">
+<div class="image-container" style="max-width: 675px; max-height: 301px; background-color: transparent;">
+<div class="image-container-fill" style="padding-bottom: 44.59%;"></div>
+<div class="image-view" data-width="675" data-height="301"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-7c6642f518ffa3d2.png" data-original-width="675" data-original-height="301" data-original-format="image/png" data-original-filesize="33859" style="cursor: zoom-in;" class="" src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/944365-7c6642f518ffa3d2.png"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div>
+<blockquote>
+<p>下文会对这3个方法进行详细介绍</p>
+</blockquote>
+<h3>1.6 总结</h3>
+<div class="image-package">
+<div class="image-container" style="max-width: 700px; max-height: 297px; background-color: transparent;">
+<div class="image-container-fill" style="padding-bottom: 42.46%;"></div>
+<div class="image-view" data-width="1658" data-height="704"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-d0a7e6f3c2bbefcc.png" data-original-width="1658" data-original-height="704" data-original-format="image/png" data-original-filesize="132291" style="cursor: zoom-in;" class="" src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/944365-d0a7e6f3c2bbefcc.png"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div>
+<ul>
+<li>至此，相信大家已经对 <code>Android</code>的事件分发有了感性的认知</li>
+<li>下面，我将详细介绍<code>Android</code>事件分发机制</li>
+</ul>
+<hr>
+<h1>2. 事件分发机制 源码分析</h1>
+<ul>
+<li>请谨记：<code>Android</code>事件分发流程 = <strong>Activity -&gt; ViewGroup -&gt; View</strong>
+</li>
+</ul>
+<blockquote>
+<p>即：1个点击事件发生后，事件先传到<code>Activity</code>、再传到<code>ViewGroup</code>、最终再传到 <code>View</code></p>
+</blockquote>
+<div class="image-package">
+<div class="image-container" style="max-width: 505px; max-height: 1018px; background-color: transparent;">
+<div class="image-container-fill" style="padding-bottom: 145.54%;"></div>
+<div class="image-view" data-width="505" data-height="735"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-2064dcb69200fc6d.png" data-original-width="505" data-original-height="735" data-original-format="image/png" data-original-filesize="83468" style="cursor: zoom-in;" class="" src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/944365-2064dcb69200fc6d.png"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div>
+<ul>
+<li>从上可知，要想充分理解Android分发机制，本质上是要理解：
+<ol>
+<li>
+<code>Activity</code>对点击事件的分发机制</li>
+<li>
+<code>ViewGroup</code>对点击事件的分发机制</li>
+<li>
+<code>View</code>对点击事件的分发机制</li>
+</ol>
+</li>
+<li>下面，我将通过源码，全面解析 <strong>事件分发机制</strong>
+</li>
+</ul>
+<blockquote>
+<p>即按顺序讲解：<code>Activity</code>事件分发机制、<code>ViewGroup</code>事件分发机制、<code>View</code>事件分发机制</p>
+</blockquote>
+<h3>2.1 Activity的事件分发机制</h3>
+<p>当一个点击事件发生时，事件最先传到<code>Activity</code>的<code>dispatchTouchEvent()</code>进行事件分发</p>
+<h3>2.1.1 源码分析</h3>
+<pre class="hljs java"><code class="java"><span class="hljs-comment">/**
+  * 源码分析：Activity.dispatchTouchEvent（）
+  */</span> 
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">dispatchTouchEvent</span><span class="hljs-params">(MotionEvent ev)</span> </span>{
+
+            <span class="hljs-comment">// 一般事件列开始都是DOWN事件 = 按下事件，故此处基本是true</span>
+            <span class="hljs-keyword">if</span> (ev.getAction() == MotionEvent.ACTION_DOWN) {
+
+                onUserInteraction();
+                <span class="hljs-comment">// -&gt;&gt;分析1</span>
+
+            }
+
+            <span class="hljs-comment">// -&gt;&gt;分析2</span>
+            <span class="hljs-keyword">if</span> (getWindow().superDispatchTouchEvent(ev)) {
+
+                <span class="hljs-keyword">return</span> <span class="hljs-keyword">true</span>;
+                <span class="hljs-comment">// 若getWindow().superDispatchTouchEvent(ev)的返回true</span>
+                <span class="hljs-comment">// 则Activity.dispatchTouchEvent（）就返回true，则方法结束。即 ：该点击事件停止往下传递 &amp; 事件传递过程结束</span>
+                <span class="hljs-comment">// 否则：继续往下调用Activity.onTouchEvent</span>
+
+            }
+            <span class="hljs-comment">// -&gt;&gt;分析4</span>
+            <span class="hljs-keyword">return</span> onTouchEvent(ev);
+        }
+
+
+<span class="hljs-comment">/**
+  * 分析1：onUserInteraction()
+  * 作用：实现屏保功能
+  * 注：
+  *    a. 该方法为空方法
+  *    b. 当此activity在栈顶时，触屏点击按home，back，menu键等都会触发此方法
+  */</span>
+      <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onUserInteraction</span><span class="hljs-params">()</span> </span>{ 
+
+      }
+      <span class="hljs-comment">// 回到最初的调用原处</span>
+
+<span class="hljs-comment">/**
+  * 分析2：getWindow().superDispatchTouchEvent(ev)
+  * 说明：
+  *     a. getWindow() = 获取Window类的对象
+  *     b. Window类是抽象类，其唯一实现类 = PhoneWindow类；即此处的Window类对象 = PhoneWindow类对象
+  *     c. Window类的superDispatchTouchEvent() = 1个抽象方法，由子类PhoneWindow类实现
+  */</span>
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">superDispatchTouchEvent</span><span class="hljs-params">(MotionEvent event)</span> </span>{
+
+        <span class="hljs-keyword">return</span> mDecor.superDispatchTouchEvent(event);
+        <span class="hljs-comment">// mDecor = 顶层View（DecorView）的实例对象</span>
+        <span class="hljs-comment">// -&gt;&gt; 分析3</span>
+    }
+
+<span class="hljs-comment">/**
+  * 分析3：mDecor.superDispatchTouchEvent(event)
+  * 定义：属于顶层View（DecorView）
+  * 说明：
+  *     a. DecorView类是PhoneWindow类的一个内部类
+  *     b. DecorView继承自FrameLayout，是所有界面的父类
+  *     c. FrameLayout是ViewGroup的子类，故DecorView的间接父类 = ViewGroup
+  */</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">superDispatchTouchEvent</span><span class="hljs-params">(MotionEvent event)</span> </span>{
+
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">super</span>.dispatchTouchEvent(event);
+        <span class="hljs-comment">// 调用父类的方法 = ViewGroup的dispatchTouchEvent()</span>
+        <span class="hljs-comment">// 即 将事件传递到ViewGroup去处理，详细请看ViewGroup的事件分发机制</span>
+
+    }
+    <span class="hljs-comment">// 回到最初的调用原处</span>
+
+<span class="hljs-comment">/**
+  * 分析4：Activity.onTouchEvent（）
+  * 定义：属于顶层View（DecorView）
+  * 说明：
+  *     a. DecorView类是PhoneWindow类的一个内部类
+  *     b. DecorView继承自FrameLayout，是所有界面的父类
+  *     c. FrameLayout是ViewGroup的子类，故DecorView的间接父类 = ViewGroup
+  */</span>
+  <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">onTouchEvent</span><span class="hljs-params">(MotionEvent event)</span> </span>{
+
+        <span class="hljs-comment">// 当一个点击事件未被Activity下任何一个View接收 / 处理时</span>
+        <span class="hljs-comment">// 应用场景：处理发生在Window边界外的触摸事件</span>
+        <span class="hljs-comment">// -&gt;&gt; 分析5</span>
+        <span class="hljs-keyword">if</span> (mWindow.shouldCloseOnTouch(<span class="hljs-keyword">this</span>, event)) {
+            finish();
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">true</span>;
+        }
+        
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">false</span>;
+        <span class="hljs-comment">// 即 只有在点击事件在Window边界外才会返回true，一般情况都返回false，分析完毕</span>
+    }
+
+<span class="hljs-comment">/**
+  * 分析5：mWindow.shouldCloseOnTouch(this, event)
+  */</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">shouldCloseOnTouch</span><span class="hljs-params">(Context context, MotionEvent event)</span> </span>{
+    <span class="hljs-comment">// 主要是对于处理边界外点击事件的判断：是否是DOWN事件，event的坐标是否在边界内等</span>
+    <span class="hljs-keyword">if</span> (mCloseOnTouchOutside &amp;&amp; event.getAction() == MotionEvent.ACTION_DOWN
+            &amp;&amp; isOutOfBounds(context, event) &amp;&amp; peekDecorView() != <span class="hljs-keyword">null</span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">true</span>;
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">false</span>;
+    <span class="hljs-comment">// 返回true：说明事件在边界外，即 消费事件</span>
+    <span class="hljs-comment">// 返回false：未消费（默认）</span>
+}
+<span class="hljs-comment">// 回到分析4调用原处</span>
+</code></pre>
+<h3>2.1.2 总结</h3>
+<ul>
+<li>当一个点击事件发生时，从<code>Activity</code>的事件分发开始（<code>Activity.dispatchTouchEvent()</code>）</li>
+</ul>
+<div class="image-package">
+<div class="image-container" style="max-width: 590px; max-height: 949px; background-color: transparent;">
+<div class="image-container-fill" style="padding-bottom: 135.59%;"></div>
+<div class="image-view" data-width="590" data-height="800"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-f8fda76bbdad7b96.png" data-original-width="590" data-original-height="800" data-original-format="image/png" data-original-filesize="57464" style="cursor: zoom-in;" class="" src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/944365-f8fda76bbdad7b96.png"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div>
+<ul>
+<li>方法总结</li>
+</ul>
+<div class="image-package">
+<div class="image-container" style="max-width: 700px; max-height: 462px; background-color: transparent;">
+<div class="image-container-fill" style="padding-bottom: 31.11%;"></div>
+<div class="image-view" data-width="1485" data-height="462"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-e186b0edcb590546.png" data-original-width="1485" data-original-height="462" data-original-format="image/png" data-original-filesize="117681" style="cursor: zoom-in;" class="" src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/944365-e186b0edcb590546.png"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div>
+<p>那么，<code>ViewGroup</code>的<code>dispatchTouchEvent()</code>什么时候返回<code>true</code> / <code>false</code>？请继续往下看<strong>ViewGroup事件的分发机制</strong></p>
+<hr>
+<h1>2.2 ViewGroup事件的分发机制</h1>
+<p>从上面<code>Activity</code>事件分发机制可知，<code>ViewGroup</code>事件分发机制从<code>dispatchTouchEvent()</code>开始</p>
+<h3>2.2.1 源码分析</h3>
+<blockquote>
+<ol>
+<li>
+<code>Android 5.0</code>后，<code>ViewGroup.dispatchTouchEvent()</code>的源码发生了变化（更加复杂），但原理相同；</li>
+<li>本文为了让读者容易理解，故采用<code>Android 5.0</code>前的版本</li>
+</ol>
+</blockquote>
+<pre class="hljs java"><code class="java"><span class="hljs-comment">/**
+  * 源码分析：ViewGroup.dispatchTouchEvent（）
+  */</span> 
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">dispatchTouchEvent</span><span class="hljs-params">(MotionEvent ev)</span> </span>{ 
+
+    ... <span class="hljs-comment">// 仅贴出关键代码</span>
+
+        <span class="hljs-comment">// 重点分析1：ViewGroup每次事件分发时，都需调用onInterceptTouchEvent()询问是否拦截事件</span>
+            <span class="hljs-keyword">if</span> (disallowIntercept || !onInterceptTouchEvent(ev)) {  
+
+            <span class="hljs-comment">// 判断值1：disallowIntercept = 是否禁用事件拦截的功能(默认是false)，可通过调用requestDisallowInterceptTouchEvent（）修改</span>
+            <span class="hljs-comment">// 判断值2： !onInterceptTouchEvent(ev) = 对onInterceptTouchEvent()返回值取反</span>
+                    <span class="hljs-comment">// a. 若在onInterceptTouchEvent()中返回false（即不拦截事件），就会让第二个值为true，从而进入到条件判断的内部</span>
+                    <span class="hljs-comment">// b. 若在onInterceptTouchEvent()中返回true（即拦截事件），就会让第二个值为false，从而跳出了这个条件判断</span>
+                    <span class="hljs-comment">// c. 关于onInterceptTouchEvent() -&gt;&gt;分析1</span>
+
+                ev.setAction(MotionEvent.ACTION_DOWN);  
+                <span class="hljs-keyword">final</span> <span class="hljs-keyword">int</span> scrolledXInt = (<span class="hljs-keyword">int</span>) scrolledXFloat;  
+                <span class="hljs-keyword">final</span> <span class="hljs-keyword">int</span> scrolledYInt = (<span class="hljs-keyword">int</span>) scrolledYFloat;  
+                <span class="hljs-keyword">final</span> View[] children = mChildren;  
+                <span class="hljs-keyword">final</span> <span class="hljs-keyword">int</span> count = mChildrenCount;  
+
+        <span class="hljs-comment">// 重点分析2</span>
+            <span class="hljs-comment">// 通过for循环，遍历了当前ViewGroup下的所有子View</span>
+            <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = count - <span class="hljs-number">1</span>; i &gt;= <span class="hljs-number">0</span>; i--) {  
+                <span class="hljs-keyword">final</span> View child = children[i];  
+                <span class="hljs-keyword">if</span> ((child.mViewFlags &amp; VISIBILITY_MASK) == VISIBLE  
+                        || child.getAnimation() != <span class="hljs-keyword">null</span>) {  
+                    child.getHitRect(frame);  
+
+                    <span class="hljs-comment">// 判断当前遍历的View是不是正在点击的View，从而找到当前被点击的View</span>
+                    <span class="hljs-comment">// 若是，则进入条件判断内部</span>
+                    <span class="hljs-keyword">if</span> (frame.contains(scrolledXInt, scrolledYInt)) {  
+                        <span class="hljs-keyword">final</span> <span class="hljs-keyword">float</span> xc = scrolledXFloat - child.mLeft;  
+                        <span class="hljs-keyword">final</span> <span class="hljs-keyword">float</span> yc = scrolledYFloat - child.mTop;  
+                        ev.setLocation(xc, yc);  
+                        child.mPrivateFlags &amp;= ~CANCEL_NEXT_UP_EVENT;  
+
+                        <span class="hljs-comment">// 条件判断的内部调用了该View的dispatchTouchEvent()</span>
+                        <span class="hljs-comment">// 即 实现了点击事件从ViewGroup到子View的传递（具体请看下面的View事件分发机制）</span>
+                        <span class="hljs-keyword">if</span> (child.dispatchTouchEvent(ev))  { 
+
+                        mMotionTarget = child;  
+                        <span class="hljs-keyword">return</span> <span class="hljs-keyword">true</span>; 
+                        <span class="hljs-comment">// 调用子View的dispatchTouchEvent后是有返回值的</span>
+                        <span class="hljs-comment">// 若该控件可点击，那么点击时，dispatchTouchEvent的返回值必定是true，因此会导致条件判断成立</span>
+                        <span class="hljs-comment">// 于是给ViewGroup的dispatchTouchEvent（）直接返回了true，即直接跳出</span>
+                        <span class="hljs-comment">// 即把ViewGroup的点击事件拦截掉</span>
+
+                                }  
+                            }  
+                        }  
+                    }  
+                }  
+            }  
+            <span class="hljs-keyword">boolean</span> isUpOrCancel = (action == MotionEvent.ACTION_UP) ||  
+                    (action == MotionEvent.ACTION_CANCEL);  
+            <span class="hljs-keyword">if</span> (isUpOrCancel) {  
+                mGroupFlags &amp;= ~FLAG_DISALLOW_INTERCEPT;  
+            }  
+            <span class="hljs-keyword">final</span> View target = mMotionTarget;  
+
+        <span class="hljs-comment">// 重点分析3</span>
+        <span class="hljs-comment">// 若点击的是空白处（即无任何View接收事件） / 拦截事件（手动复写onInterceptTouchEvent（），从而让其返回true）</span>
+        <span class="hljs-keyword">if</span> (target == <span class="hljs-keyword">null</span>) {  
+            ev.setLocation(xf, yf);  
+            <span class="hljs-keyword">if</span> ((mPrivateFlags &amp; CANCEL_NEXT_UP_EVENT) != <span class="hljs-number">0</span>) {  
+                ev.setAction(MotionEvent.ACTION_CANCEL);  
+                mPrivateFlags &amp;= ~CANCEL_NEXT_UP_EVENT;  
+            }  
+            
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">super</span>.dispatchTouchEvent(ev);
+            <span class="hljs-comment">// 调用ViewGroup父类的dispatchTouchEvent()，即View.dispatchTouchEvent()</span>
+            <span class="hljs-comment">// 因此会执行ViewGroup的onTouch() -&gt;&gt; onTouchEvent() -&gt;&gt; performClick（） -&gt;&gt; onClick()，即自己处理该事件，事件不会往下传递（具体请参考View事件的分发机制中的View.dispatchTouchEvent（））</span>
+            <span class="hljs-comment">// 此处需与上面区别：子View的dispatchTouchEvent（）</span>
+        } 
+
+        ... 
+
+}
+<span class="hljs-comment">/**
+  * 分析1：ViewGroup.onInterceptTouchEvent()
+  * 作用：是否拦截事件
+  * 说明：
+  *     a. 返回true = 拦截，即事件停止往下传递（需手动设置，即复写onInterceptTouchEvent（），从而让其返回true）
+  *     b. 返回false = 不拦截（默认）
+  */</span>
+  <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">onInterceptTouchEvent</span><span class="hljs-params">(MotionEvent ev)</span> </span>{  
+    
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">false</span>;
+
+  } 
+  <span class="hljs-comment">// 回到调用原处</span>
+</code></pre>
+<h3>2.2.2 总结</h3>
+<ul>
+<li>结论：<code>Android</code>事件分发总是先传递到<code>ViewGroup</code>、再传递到<code>View</code>
+</li>
+<li>过程：当点击了某个控件时</li>
+</ul>
+<div class="image-package">
+<div class="image-container" style="max-width: 700px; max-height: 785px; background-color: transparent;">
+<div class="image-container-fill" style="padding-bottom: 112.20000000000002%;"></div>
+<div class="image-view" data-width="713" data-height="800"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-6ec2e864af7ffd37.png" data-original-width="713" data-original-height="800" data-original-format="image/png" data-original-filesize="74077" style="cursor: zoom-in;" class="" src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/944365-6ec2e864af7ffd37.png"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div>
+<ul>
+<li>核心方法总结</li>
+</ul>
+<div class="image-package">
+<div class="image-container" style="max-width: 700px; max-height: 676px; background-color: transparent;">
+<div class="image-container-fill" style="padding-bottom: 45.519999999999996%;"></div>
+<div class="image-view" data-width="1485" data-height="676"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-ff627fea1a2244ad.png" data-original-width="1485" data-original-height="676" data-original-format="image/png" data-original-filesize="178981" style="cursor: zoom-in;" class="" src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/944365-ff627fea1a2244ad.png"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div>
+<h3>2.2.3 Demo讲解</h3>
+<ul>
+<li>
+<p>布局如下</p>
+<br>
+<div class="image-package">
+<div class="image-container" style="max-width: 210px; max-height: 336px; background-color: transparent;">
+<div class="image-container-fill" style="padding-bottom: 160.0%;"></div>
+<div class="image-view" data-width="210" data-height="336"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-b0bf3dd7ad41b335.png" data-original-width="210" data-original-height="336" data-original-format="image/png" data-original-filesize="7939" style="cursor: zoom-in;" class="" src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/944365-b0bf3dd7ad41b335.png"></div>
+</div>
+<div class="image-caption">布局层次</div>
+</div>
+</li>
+<li><p>测试代码</p></li>
+</ul>
+<p>布局文件：<em>activity_main.xml</em></p>
+<pre class="hljs xml"><code class="xml"><span class="php"><span class="hljs-meta">&lt;?</span>xml version=<span class="hljs-string">"1.0"</span> encoding=<span class="hljs-string">"utf-8"</span><span class="hljs-meta">?&gt;</span></span>
+<span class="hljs-tag">&lt;<span class="hljs-name">LinearLayout</span> <span class="hljs-attr">xmlns:android</span>=<span class="hljs-string">"http://schemas.android.com/apk/res/android"</span>
+    <span class="hljs-attr">android:id</span>=<span class="hljs-string">"@+id/my_layout"</span>
+    <span class="hljs-attr">android:layout_width</span>=<span class="hljs-string">"match_parent"</span>
+    <span class="hljs-attr">android:layout_height</span>=<span class="hljs-string">"match_parent"</span>
+    <span class="hljs-attr">xmlns:app</span>=<span class="hljs-string">"http://schemas.android.com/apk/res-auto"</span>
+    <span class="hljs-attr">android:focusableInTouchMode</span>=<span class="hljs-string">"true"</span>
+    <span class="hljs-attr">android:orientation</span>=<span class="hljs-string">"vertical"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">Button</span>
+        <span class="hljs-attr">android:id</span>=<span class="hljs-string">"@+id/button1"</span>
+        <span class="hljs-attr">android:layout_width</span>=<span class="hljs-string">"wrap_content"</span>
+        <span class="hljs-attr">android:layout_height</span>=<span class="hljs-string">"wrap_content"</span>
+        <span class="hljs-attr">android:text</span>=<span class="hljs-string">"按钮1"</span> /&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">Button</span>
+        <span class="hljs-attr">android:id</span>=<span class="hljs-string">"@+id/button2"</span>
+        <span class="hljs-attr">android:layout_width</span>=<span class="hljs-string">"wrap_content"</span>
+        <span class="hljs-attr">android:layout_height</span>=<span class="hljs-string">"wrap_content"</span>
+        <span class="hljs-attr">android:text</span>=<span class="hljs-string">"按钮2"</span> /&gt;</span>
+
+<span class="hljs-tag">&lt;/<span class="hljs-name">LinearLayout</span>&gt;</span>
+
+</code></pre>
+<p>核心代码：<em>MainActivity.java</em></p>
+<pre class="hljs java"><code class="java"><span class="hljs-comment">/**
+  * ViewGroup布局（myLayout）中有2个子View = 2个按钮
+  */</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MainActivity</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AppCompatActivity</span> </span>{
+
+    Button button1,button2;
+    ViewGroup myLayout;
+
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onCreate</span><span class="hljs-params">(Bundle savedInstanceState)</span> </span>{
+        <span class="hljs-keyword">super</span>.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        button1 = (Button)findViewById(R.id.button1);
+        button2 = (Button)findViewById(R.id.button2);
+        myLayout = (LinearLayout)findViewById(R.id.my_layout);
+
+        <span class="hljs-comment">// 1.为ViewGroup布局设置监听事件</span>
+        myLayout.setOnClickListener(<span class="hljs-keyword">new</span> View.OnClickListener() {
+            <span class="hljs-meta">@Override</span>
+            <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onClick</span><span class="hljs-params">(View v)</span> </span>{
+                Log.d(<span class="hljs-string">"TAG"</span>, <span class="hljs-string">"点击了ViewGroup"</span>);
+            }
+        });
+
+        <span class="hljs-comment">// 2. 为按钮1设置监听事件</span>
+        button1.setOnClickListener(<span class="hljs-keyword">new</span> View.OnClickListener() {
+            <span class="hljs-meta">@Override</span>
+            <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onClick</span><span class="hljs-params">(View v)</span> </span>{
+                Log.d(<span class="hljs-string">"TAG"</span>, <span class="hljs-string">"点击了button1"</span>);
+            }
+        });
+
+        <span class="hljs-comment">// 3. 为按钮2设置监听事件</span>
+        button2.setOnClickListener(<span class="hljs-keyword">new</span> View.OnClickListener() {
+            <span class="hljs-meta">@Override</span>
+            <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onClick</span><span class="hljs-params">(View v)</span> </span>{
+                Log.d(<span class="hljs-string">"TAG"</span>, <span class="hljs-string">"点击了button2"</span>);
+            }
+        });
+
+    }
+}
+</code></pre>
+<ul>
+<li>
+<p>结果测试</p>
+<br>
+<div class="image-package">
+<div class="image-container" style="max-width: 700px; max-height: 248px; background-color: transparent;">
+<div class="image-container-fill" style="padding-bottom: 25.130000000000003%;"></div>
+<div class="image-view" data-width="987" data-height="248"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-a9c45aa25d12b589.png" data-original-width="987" data-original-height="248" data-original-format="image/png" data-original-filesize="131245" style="cursor: zoom-in;" class="" src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/944365-a9c45aa25d12b589.png"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div>
+</li>
+</ul>
+<p>从上面的测试结果发现：</p>
+<ul>
+<li>点击<code>Button</code>时，执行<code>Button.onClick()</code>，但<code>ViewGroupLayout</code>注册的<code>onTouch（）</code>不会执行</li>
+<li>只有点击空白区域时，才会执行<code>ViewGroupLayout</code>的<code>onTouch（）</code>
+</li>
+<li>结论：<code>Button</code>的<code>onClick()</code>将事件消费掉了，因此事件不会再继续向下传递。</li>
+</ul>
+<hr>
+<h1>2.3 View事件的分发机制</h1>
+<p>从上面<code>ViewGroup</code>事件分发机制知道，<code>View</code>事件分发机制从<code>dispatchTouchEvent()</code>开始</p>
+<h3>2.3.1 源码分析</h3>
+<pre class="hljs java"><code class="java"><span class="hljs-comment">/**
+  * 源码分析：View.dispatchTouchEvent（）
+  */</span>
+  <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">dispatchTouchEvent</span><span class="hljs-params">(MotionEvent event)</span> </span>{  
+
+        <span class="hljs-keyword">if</span> (mOnTouchListener != <span class="hljs-keyword">null</span> &amp;&amp; (mViewFlags &amp; ENABLED_MASK) == ENABLED &amp;&amp;  
+                mOnTouchListener.onTouch(<span class="hljs-keyword">this</span>, event)) {  
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">true</span>;  
+        } 
+        <span class="hljs-keyword">return</span> onTouchEvent(event);  
+  }
+  <span class="hljs-comment">// 说明：只有以下3个条件都为真，dispatchTouchEvent()才返回true；否则执行onTouchEvent()</span>
+  <span class="hljs-comment">//     1. mOnTouchListener != null</span>
+  <span class="hljs-comment">//     2. (mViewFlags &amp; ENABLED_MASK) == ENABLED</span>
+  <span class="hljs-comment">//     3. mOnTouchListener.onTouch(this, event)</span>
+  <span class="hljs-comment">// 下面对这3个条件逐个分析</span>
+
+
+<span class="hljs-comment">/**
+  * 条件1：mOnTouchListener != null
+  * 说明：mOnTouchListener变量在View.setOnTouchListener（）方法里赋值
+  */</span>
+  <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">setOnTouchListener</span><span class="hljs-params">(OnTouchListener l)</span> </span>{ 
+
+    mOnTouchListener = l;  
+    <span class="hljs-comment">// 即只要我们给控件注册了Touch事件，mOnTouchListener就一定被赋值（不为空）</span>
+        
+} 
+
+<span class="hljs-comment">/**
+  * 条件2：(mViewFlags &amp; ENABLED_MASK) == ENABLED
+  * 说明：
+  *     a. 该条件是判断当前点击的控件是否enable
+  *     b. 由于很多View默认enable，故该条件恒定为true
+  */</span>
+
+<span class="hljs-comment">/**
+  * 条件3：mOnTouchListener.onTouch(this, event)
+  * 说明：即 回调控件注册Touch事件时的onTouch（）；需手动复写设置，具体如下（以按钮Button为例）
+  */</span>
+    button.setOnTouchListener(<span class="hljs-keyword">new</span> OnTouchListener() {  
+        <span class="hljs-meta">@Override</span>  
+        <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">onTouch</span><span class="hljs-params">(View v, MotionEvent event)</span> </span>{  
+     
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">false</span>;  
+        }  
+    });
+    <span class="hljs-comment">// 若在onTouch（）返回true，就会让上述三个条件全部成立，从而使得View.dispatchTouchEvent（）直接返回true，事件分发结束</span>
+    <span class="hljs-comment">// 若在onTouch（）返回false，就会使得上述三个条件不全部成立，从而使得View.dispatchTouchEvent（）中跳出If，执行onTouchEvent(event)</span>
+</code></pre>
+<p>接下来，我们继续看：<strong>onTouchEvent(event)</strong>的源码分析</p>
+<blockquote>
+<ol>
+<li>详情请看注释</li>
+<li>
+<code>Android 5.0</code>后 <code>View.onTouchEvent()</code>源码发生了变化（更加复杂），但原理相同；</li>
+<li>本文为了让读者更好理解，所以采用<code>Android 5.0</code>前的版本</li>
+</ol>
+</blockquote>
+<pre class="hljs java"><code class="java"><span class="hljs-comment">/**
+  * 源码分析：View.onTouchEvent（）
+  */</span>
+  <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">onTouchEvent</span><span class="hljs-params">(MotionEvent event)</span> </span>{  
+    <span class="hljs-keyword">final</span> <span class="hljs-keyword">int</span> viewFlags = mViewFlags;  
+
+    <span class="hljs-keyword">if</span> ((viewFlags &amp; ENABLED_MASK) == DISABLED) {  
+         
+        <span class="hljs-keyword">return</span> (((viewFlags &amp; CLICKABLE) == CLICKABLE ||  
+                (viewFlags &amp; LONG_CLICKABLE) == LONG_CLICKABLE));  
+    }  
+    <span class="hljs-keyword">if</span> (mTouchDelegate != <span class="hljs-keyword">null</span>) {  
+        <span class="hljs-keyword">if</span> (mTouchDelegate.onTouchEvent(event)) {  
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">true</span>;  
+        }  
+    }  
+
+    <span class="hljs-comment">// 若该控件可点击，则进入switch判断中</span>
+    <span class="hljs-keyword">if</span> (((viewFlags &amp; CLICKABLE) == CLICKABLE ||  
+            (viewFlags &amp; LONG_CLICKABLE) == LONG_CLICKABLE)) {  
+
+                <span class="hljs-keyword">switch</span> (event.getAction()) { 
+
+                    <span class="hljs-comment">// a. 若当前的事件 = 抬起View（主要分析）</span>
+                    <span class="hljs-keyword">case</span> MotionEvent.ACTION_UP:  
+                        <span class="hljs-keyword">boolean</span> prepressed = (mPrivateFlags &amp; PREPRESSED) != <span class="hljs-number">0</span>;  
+
+                            ...<span class="hljs-comment">// 经过种种判断，此处省略</span>
+
+                            <span class="hljs-comment">// 执行performClick() -&gt;&gt;分析1</span>
+                            performClick();  
+                            <span class="hljs-keyword">break</span>;  
+
+                    <span class="hljs-comment">// b. 若当前的事件 = 按下View</span>
+                    <span class="hljs-keyword">case</span> MotionEvent.ACTION_DOWN:  
+                        <span class="hljs-keyword">if</span> (mPendingCheckForTap == <span class="hljs-keyword">null</span>) {  
+                            mPendingCheckForTap = <span class="hljs-keyword">new</span> CheckForTap();  
+                        }  
+                        mPrivateFlags |= PREPRESSED;  
+                        mHasPerformedLongPress = <span class="hljs-keyword">false</span>;  
+                        postDelayed(mPendingCheckForTap, ViewConfiguration.getTapTimeout());  
+                        <span class="hljs-keyword">break</span>;  
+
+                    <span class="hljs-comment">// c. 若当前的事件 = 结束事件（非人为原因）</span>
+                    <span class="hljs-keyword">case</span> MotionEvent.ACTION_CANCEL:  
+                        mPrivateFlags &amp;= ~PRESSED;  
+                        refreshDrawableState();  
+                        removeTapCallback();  
+                        <span class="hljs-keyword">break</span>;
+
+                    <span class="hljs-comment">// d. 若当前的事件 = 滑动View</span>
+                    <span class="hljs-keyword">case</span> MotionEvent.ACTION_MOVE:  
+                        <span class="hljs-keyword">final</span> <span class="hljs-keyword">int</span> x = (<span class="hljs-keyword">int</span>) event.getX();  
+                        <span class="hljs-keyword">final</span> <span class="hljs-keyword">int</span> y = (<span class="hljs-keyword">int</span>) event.getY();  
+        
+                        <span class="hljs-keyword">int</span> slop = mTouchSlop;  
+                        <span class="hljs-keyword">if</span> ((x &lt; <span class="hljs-number">0</span> - slop) || (x &gt;= getWidth() + slop) ||  
+                                (y &lt; <span class="hljs-number">0</span> - slop) || (y &gt;= getHeight() + slop)) {  
+                            <span class="hljs-comment">// Outside button  </span>
+                            removeTapCallback();  
+                            <span class="hljs-keyword">if</span> ((mPrivateFlags &amp; PRESSED) != <span class="hljs-number">0</span>) {  
+                                <span class="hljs-comment">// Remove any future long press/tap checks  </span>
+                                removeLongPressCallback();  
+                                <span class="hljs-comment">// Need to switch from pressed to not pressed  </span>
+                                mPrivateFlags &amp;= ~PRESSED;  
+                                refreshDrawableState();  
+                            }  
+                        }  
+                        <span class="hljs-keyword">break</span>;  
+                }  
+                <span class="hljs-comment">// 若该控件可点击，就一定返回true</span>
+                <span class="hljs-keyword">return</span> <span class="hljs-keyword">true</span>;  
+            }  
+             <span class="hljs-comment">// 若该控件不可点击，就一定返回false</span>
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">false</span>;  
+        }
+
+<span class="hljs-comment">/**
+  * 分析1：performClick（）
+  */</span>  
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">performClick</span><span class="hljs-params">()</span> </span>{  
+
+        <span class="hljs-keyword">if</span> (mOnClickListener != <span class="hljs-keyword">null</span>) {  
+            playSoundEffect(SoundEffectConstants.CLICK);  
+            mOnClickListener.onClick(<span class="hljs-keyword">this</span>);  
+            <span class="hljs-keyword">return</span> <span class="hljs-keyword">true</span>;  
+            <span class="hljs-comment">// 只要我们通过setOnClickListener（）为控件View注册1个点击事件</span>
+            <span class="hljs-comment">// 那么就会给mOnClickListener变量赋值（即不为空）</span>
+            <span class="hljs-comment">// 则会往下回调onClick（） &amp; performClick（）返回true</span>
+        }  
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">false</span>;  
+    }  
+</code></pre>
+<h3>2.3.2 总结</h3>
+<ul>
+<li>每当控件被点击时：</li>
+</ul>
+<div class="image-package">
+<div class="image-container" style="max-width: 590px; max-height: 1032px;">
+<div class="image-container-fill" style="padding-bottom: 147.45999999999998%;"></div>
+<div class="image-view" data-width="590" data-height="870"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-76ce9e8299386729.png" data-original-width="590" data-original-height="870" data-original-format="image/png" data-original-filesize="56953" style="cursor: zoom-in;" class="image-loading"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div>
+<blockquote>
+<p>注：<code>onTouch（）</code>的执行 先于  <code>onClick（）</code></p>
+</blockquote>
+<ul>
+<li>核心方法总结</li>
+</ul>
+<div class="image-package">
+<div class="image-container" style="max-width: 700px; max-height: 462px;">
+<div class="image-container-fill" style="padding-bottom: 31.11%;"></div>
+<div class="image-view" data-width="1485" data-height="462"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-762cf45f36858bbd.png" data-original-width="1485" data-original-height="462" data-original-format="image/png" data-original-filesize="110086" style="cursor: zoom-in;" class="image-loading"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div>
+<h3>2.3.3 Demo讲解</h3>
+<p>下面我将用<code>Demo</code>验证上述的结论</p>
+<pre class="hljs java"><code class="java"><span class="hljs-comment">/**
+  * 结论验证1：在回调onTouch()里返回false
+  */</span>
+   <span class="hljs-comment">// 1. 通过OnTouchListener()复写onTouch()，从而手动设置返回false</span>
+   button.setOnTouchListener(<span class="hljs-keyword">new</span> View.OnTouchListener() {
+
+            <span class="hljs-meta">@Override</span>
+            <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">onTouch</span><span class="hljs-params">(View v, MotionEvent event)</span> </span>{
+                System.out.println(<span class="hljs-string">"执行了onTouch(), 动作是:"</span> + event.getAction());
+           
+                <span class="hljs-keyword">return</span> <span class="hljs-keyword">false</span>;
+            }
+        });
+
+    <span class="hljs-comment">// 2. 通过 OnClickListener（）为控件设置点击事件，为mOnClickListener变量赋值（即不为空），从而往下回调onClick（）</span>
+    button.setOnClickListener(<span class="hljs-keyword">new</span> View.OnClickListener() {
+
+            <span class="hljs-meta">@Override</span>
+            <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onClick</span><span class="hljs-params">(View v)</span> </span>{
+                System.out.println(<span class="hljs-string">"执行了onClick()"</span>);
+            }
+
+        });
+
+<span class="hljs-comment">/**
+  * 结论验证2：在回调onTouch()里返回true
+  */</span>
+   <span class="hljs-comment">// 1. 通过OnTouchListener()复写onTouch()，从而手动设置返回true</span>
+   button.setOnTouchListener(<span class="hljs-keyword">new</span> View.OnTouchListener() {
+
+            <span class="hljs-meta">@Override</span>
+            <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">onTouch</span><span class="hljs-params">(View v, MotionEvent event)</span> </span>{
+                System.out.println(<span class="hljs-string">"执行了onTouch(), 动作是:"</span> + event.getAction());
+           
+                <span class="hljs-keyword">return</span> <span class="hljs-keyword">true</span>;
+            }
+        });
+
+    <span class="hljs-comment">// 2. 通过 OnClickListener（）为控件设置点击事件，为mOnClickListener变量赋值（即不为空）</span>
+    <span class="hljs-comment">// 但由于dispatchTouchEvent（）返回true，即事件不再向下传递，故不调用onClick()）</span>
+    button.setOnClickListener(<span class="hljs-keyword">new</span> View.OnClickListener() {
+
+            <span class="hljs-meta">@Override</span>
+            <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onClick</span><span class="hljs-params">(View v)</span> </span>{
+                System.out.println(<span class="hljs-string">"执行了onClick()"</span>);
+            }
+            
+        });
+
+</code></pre>
+<ul>
+<li>
+<p>测试结果</p>
+<br>
+<div class="image-package">
+<div class="image-container" style="max-width: 700px; max-height: 346px;">
+<div class="image-container-fill" style="padding-bottom: 38.269999999999996%;"></div>
+<div class="image-view" data-width="904" data-height="346"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-97959093583369a0.png" data-original-width="904" data-original-height="346" data-original-format="image/png" data-original-filesize="121288" style="cursor: zoom-in;" class="image-loading"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div>
+</li>
+</ul>
+<h1>2.4 总结</h1>
+<div class="image-package">
+<div class="image-container" style="max-width: 700px; max-height: 311px;">
+<div class="image-container-fill" style="padding-bottom: 44.57%;"></div>
+<div class="image-view" data-width="2190" data-height="976"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-eeebede55f55b040.png" data-original-width="2190" data-original-height="976" data-original-format="image/png" data-original-filesize="194842" style="cursor: zoom-in;" class="image-loading"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div>
+<h3>若您已经看到此处，那么恭喜你，你已经能非常熟悉掌握Android的事件分发机制了</h3>
+<blockquote>
+<p>即：<code>Activity</code>、<code>ViewGroup</code>、<code>View</code> 的事件分发机制</p>
+</blockquote>
+<hr>
+<h1>3. 工作流程 总结</h1>
+<ul>
+<li>在本节中，我将结合源码，梳理出1个事件分发的工作流程总结，具体如下：</li>
+</ul>
+<div class="image-package">
+<div class="image-container" style="max-width: 700px; max-height: 795px;">
+<div class="image-container-fill" style="padding-bottom: 113.68%;"></div>
+<div class="image-view" data-width="1140" data-height="1296"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-aea821bbb613c195.png" data-original-width="1140" data-original-height="1296" data-original-format="image/png" data-original-filesize="96386" style="cursor: zoom-in;" class="image-loading"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div>
+<blockquote>
+<p>左侧虚线：具备相关性 &amp; 逐层返回</p>
+</blockquote>
+<ul>
+<li>以角色为核心的图解说明</li>
+</ul>
+<div class="image-package">
+<div class="image-container" style="max-width: 700px; max-height: 604px;">
+<div class="image-container-fill" style="padding-bottom: 86.33999999999999%;"></div>
+<div class="image-view" data-width="1610" data-height="1390"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-bccafd3ff8a880ff.png" data-original-width="1610" data-original-height="1390" data-original-format="image/png" data-original-filesize="386091" style="cursor: zoom-in;" class="image-loading"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div>
+<ul>
+<li>以方法为核心的图解说明</li>
+</ul>
+<div class="image-package">
+<div class="image-container" style="max-width: 700px; max-height: 354px;">
+<div class="image-container-fill" style="padding-bottom: 50.68%;"></div>
+<div class="image-view" data-width="1460" data-height="740"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-9f340a39bdad520e.png" data-original-width="1460" data-original-height="740" data-original-format="image/png" data-original-filesize="239184" style="cursor: zoom-in;" class="image-loading"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div>
+<hr>
+<h1>4. 核心方法总结</h1>
+<ul>
+<li>
+<p>已知事件分发过程的核心方法为：<code>dispatchTouchEvent()</code>、<code>onInterceptTouchEvent()</code> 和 <code>onTouchEvent()</code><br>
+</p>
+<div class="image-package">
+<div class="image-container" style="max-width: 700px; max-height: 345px;">
+<div class="image-container-fill" style="padding-bottom: 49.32%;"></div>
+<div class="image-view" data-width="1460" data-height="720"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-faaf73d0f3eb870f.png" data-original-width="1460" data-original-height="720" data-original-format="image/png" data-original-filesize="230907" style="cursor: zoom-in;" class="image-loading"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div>
+<p></p>
+</li>
+<li><p>下面，我将结合总结的工作流程，再次详细讲解该3个方法</p></li>
+</ul>
+<h3>4.1 dispatchTouchEvent()</h3>
+<ul>
+<li>简介</li>
+</ul>
+<div class="image-package">
+<div class="image-container" style="max-width: 700px; max-height: 310px;">
+<div class="image-container-fill" style="padding-bottom: 23.24%;"></div>
+<div class="image-view" data-width="1334" data-height="310"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-4fbf11afa24b033b.png" data-original-width="1334" data-original-height="310" data-original-format="image/png" data-original-filesize="83691" style="cursor: zoom-in;" class="image-loading"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div>
+<div class="image-package">
+<div class="image-container" style="max-width: 700px; max-height: 795px;">
+<div class="image-container-fill" style="padding-bottom: 113.68%;"></div>
+<div class="image-view" data-width="1140" data-height="1296"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-f8888a622c255648.png" data-original-width="1140" data-original-height="1296" data-original-format="image/png" data-original-filesize="94695" style="cursor: zoom-in;" class="image-loading"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div>
+<ul>
+<li>返回情况说明</li>
+</ul>
+<p><strong>情况1：默认</strong><br>
+</p><div class="image-package">
+<div class="image-container" style="max-width: 700px; max-height: 141px;">
+<div class="image-container-fill" style="padding-bottom: 17.11%;"></div>
+<div class="image-view" data-width="824" data-height="141"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-a4582905b3972904.png" data-original-width="824" data-original-height="141" data-original-format="image/png" data-original-filesize="24132" style="cursor: zoom-in;" class="image-loading"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div><p></p>
+<div class="image-package">
+<div class="image-container" style="max-width: 700px; max-height: 795px;">
+<div class="image-container-fill" style="padding-bottom: 113.68%;"></div>
+<div class="image-view" data-width="1140" data-height="1296"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-fee3555bdc6f9524.png" data-original-width="1140" data-original-height="1296" data-original-format="image/png" data-original-filesize="92795" style="cursor: zoom-in;" class="image-loading"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div>
+<p><strong>情况2：返回true</strong><br>
+</p><div class="image-package">
+<div class="image-container" style="max-width: 700px; max-height: 260px;">
+<div class="image-container-fill" style="padding-bottom: 20.41%;"></div>
+<div class="image-view" data-width="1274" data-height="260"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-b00acc9f529f5393.png" data-original-width="1274" data-original-height="260" data-original-format="image/png" data-original-filesize="57696" style="cursor: zoom-in;" class="image-loading"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div><p></p>
+<div class="image-package">
+<div class="image-container" style="max-width: 700px; max-height: 795px;">
+<div class="image-container-fill" style="padding-bottom: 113.68%;"></div>
+<div class="image-view" data-width="1140" data-height="1296"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-6822b1af27852dbd.png" data-original-width="1140" data-original-height="1296" data-original-format="image/png" data-original-filesize="91701" style="cursor: zoom-in;" class="image-loading"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div>
+<p><strong>情况3：返回false</strong><br>
+</p><div class="image-package">
+<div class="image-container" style="max-width: 700px; max-height: 238px;">
+<div class="image-container-fill" style="padding-bottom: 18.68%;"></div>
+<div class="image-view" data-width="1274" data-height="238"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-962fc440d2fffe0b.png" data-original-width="1274" data-original-height="238" data-original-format="image/png" data-original-filesize="68113" style="cursor: zoom-in;" class="image-loading"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div><p></p>
+<div class="image-package">
+<div class="image-container" style="max-width: 700px; max-height: 795px;">
+<div class="image-container-fill" style="padding-bottom: 113.68%;"></div>
+<div class="image-view" data-width="1140" data-height="1296"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-0a9ae1bc05f432b9.png" data-original-width="1140" data-original-height="1296" data-original-format="image/png" data-original-filesize="93092" style="cursor: zoom-in;" class="image-loading"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div>
+<hr>
+<h3>4.2 onInterceptTouchEvent()</h3>
+<ul>
+<li>简介</li>
+</ul>
+<div class="image-package">
+<div class="image-container" style="max-width: 700px; max-height: 263px;">
+<div class="image-container-fill" style="padding-bottom: 19.57%;"></div>
+<div class="image-view" data-width="1344" data-height="263"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-f4116863606e494e.png" data-original-width="1344" data-original-height="263" data-original-format="image/png" data-original-filesize="71912" style="cursor: zoom-in;" class="image-loading"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div>
+<blockquote>
+<p>注：<code>Activity</code>、<code>View</code>都无该方法</p>
+</blockquote>
+<div class="image-package">
+<div class="image-container" style="max-width: 700px; max-height: 795px;">
+<div class="image-container-fill" style="padding-bottom: 113.68%;"></div>
+<div class="image-view" data-width="1140" data-height="1296"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-28d0f5e7a1665148.png" data-original-width="1140" data-original-height="1296" data-original-format="image/png" data-original-filesize="91393" style="cursor: zoom-in;" class="image-loading"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div>
+<ul>
+<li>返回情况说明</li>
+</ul>
+<p><strong>情况1：true</strong></p>
+<div class="image-package">
+<div class="image-container" style="max-width: 700px; max-height: 172px;">
+<div class="image-container-fill" style="padding-bottom: 18.57%;"></div>
+<div class="image-view" data-width="926" data-height="172"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-9a83aed00a8c0a54.png" data-original-width="926" data-original-height="172" data-original-format="image/png" data-original-filesize="27629" style="cursor: zoom-in;" class="image-loading"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div>
+<div class="image-package">
+<div class="image-container" style="max-width: 700px; max-height: 795px;">
+<div class="image-container-fill" style="padding-bottom: 113.68%;"></div>
+<div class="image-view" data-width="1140" data-height="1296"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-6889eda6ebda8c40.png" data-original-width="1140" data-original-height="1296" data-original-format="image/png" data-original-filesize="90903" style="cursor: zoom-in;" class="image-loading"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div>
+<p><strong>情况2：false（默认）</strong></p>
+<div class="image-package">
+<div class="image-container" style="max-width: 700px; max-height: 152px;">
+<div class="image-container-fill" style="padding-bottom: 16.41%;"></div>
+<div class="image-view" data-width="926" data-height="152"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-ea06029e3176635f.png" data-original-width="926" data-original-height="152" data-original-format="image/png" data-original-filesize="25795" style="cursor: zoom-in;" class="image-loading"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div>
+<div class="image-package">
+<div class="image-container" style="max-width: 700px; max-height: 795px;">
+<div class="image-container-fill" style="padding-bottom: 113.68%;"></div>
+<div class="image-view" data-width="1140" data-height="1296"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-299cfcbe3a9c9fd5.png" data-original-width="1140" data-original-height="1296" data-original-format="image/png" data-original-filesize="91115" style="cursor: zoom-in;" class="image-loading"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div>
+<hr>
+<h3>4.3 onTouchEvent()</h3>
+<ul>
+<li>简介</li>
+</ul>
+<div class="image-package">
+<div class="image-container" style="max-width: 700px; max-height: 218px;">
+<div class="image-container-fill" style="padding-bottom: 16.220000000000002%;"></div>
+<div class="image-view" data-width="1344" data-height="218"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-b5f527027257b98e.png" data-original-width="1344" data-original-height="218" data-original-format="image/png" data-original-filesize="62438" style="cursor: zoom-in;" class="image-loading"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div>
+<div class="image-package">
+<div class="image-container" style="max-width: 700px; max-height: 795px;">
+<div class="image-container-fill" style="padding-bottom: 113.68%;"></div>
+<div class="image-view" data-width="1140" data-height="1296"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-744f5b7e8d413562.png" data-original-width="1140" data-original-height="1296" data-original-format="image/png" data-original-filesize="93019" style="cursor: zoom-in;" class="image-loading"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div>
+<ul>
+<li>返回情况说明</li>
+</ul>
+<p><strong>情况1：返回true</strong></p>
+<div class="image-package">
+<div class="image-container" style="max-width: 700px; max-height: 245px;">
+<div class="image-container-fill" style="padding-bottom: 29.73%;"></div>
+<div class="image-view" data-width="824" data-height="245"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-36af591c11a8e450.png" data-original-width="824" data-original-height="245" data-original-format="image/png" data-original-filesize="43428" style="cursor: zoom-in;" class="image-loading"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div>
+<div class="image-package">
+<div class="image-container" style="max-width: 700px; max-height: 795px;">
+<div class="image-container-fill" style="padding-bottom: 113.68%;"></div>
+<div class="image-view" data-width="1140" data-height="1296"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-aef94c6c182353a9.png" data-original-width="1140" data-original-height="1296" data-original-format="image/png" data-original-filesize="91890" style="cursor: zoom-in;" class="image-loading"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div>
+<p><strong>情况2：返回false（default）</strong><br>
+</p><div class="image-package">
+<div class="image-container" style="max-width: 700px; max-height: 245px;">
+<div class="image-container-fill" style="padding-bottom: 29.73%;"></div>
+<div class="image-view" data-width="824" data-height="245"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-efd21a46a9af808e.png" data-original-width="824" data-original-height="245" data-original-format="image/png" data-original-filesize="45229" style="cursor: zoom-in;" class="image-loading"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div><p></p>
+<div class="image-package">
+<div class="image-container" style="max-width: 700px; max-height: 795px;">
+<div class="image-container-fill" style="padding-bottom: 113.68%;"></div>
+<div class="image-view" data-width="1140" data-height="1296"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-5da9fe2990f75d9c.png" data-original-width="1140" data-original-height="1296" data-original-format="image/png" data-original-filesize="92672" style="cursor: zoom-in;" class="image-loading"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div>
+<h3>4.4 三者关系</h3>
+<p>下面，我用一段伪代码来阐述上述3个方法的关系 &amp; 事件传递规则</p>
+<pre class="hljs java"><code class="java"><span class="hljs-comment">/**
+  * 点击事件产生后
+  */</span> 
+  <span class="hljs-comment">// 步骤1：调用dispatchTouchEvent（）</span>
+  <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">boolean</span> <span class="hljs-title">dispatchTouchEvent</span><span class="hljs-params">(MotionEvent ev)</span> </span>{
+
+    <span class="hljs-keyword">boolean</span> consume = <span class="hljs-keyword">false</span>; <span class="hljs-comment">//代表 是否会消费事件</span>
+    
+    <span class="hljs-comment">// 步骤2：判断是否拦截事件</span>
+    <span class="hljs-keyword">if</span> (onInterceptTouchEvent(ev)) {
+      <span class="hljs-comment">// a. 若拦截，则将该事件交给当前View进行处理</span>
+      <span class="hljs-comment">// 即调用onTouchEvent (）方法去处理点击事件</span>
+        consume = onTouchEvent (ev) ;
+
+    } <span class="hljs-keyword">else</span> {
+
+      <span class="hljs-comment">// b. 若不拦截，则将该事件传递到下层</span>
+      <span class="hljs-comment">// 即 下层元素的dispatchTouchEvent（）就会被调用，重复上述过程</span>
+      <span class="hljs-comment">// 直到点击事件被最终处理为止</span>
+      consume = child.dispatchTouchEvent (ev) ;
+    }
+
+    <span class="hljs-comment">// 步骤3：最终返回通知 该事件是否被消费（接收 &amp; 处理）</span>
+    <span class="hljs-keyword">return</span> consume;
+
+   }
+</code></pre>
+<hr>
+<h1>5. 常见的事件分发场景</h1>
+<p>下面，我将通过实例说明<strong>常见的事件传递情况 &amp; 流程</strong></p>
+<h3>5.1 背景描述</h3>
+<ul>
+<li>讨论的布局如下：</li>
+</ul>
+<div class="image-package">
+<div class="image-container" style="max-width: 438px; max-height: 422px;">
+<div class="image-container-fill" style="padding-bottom: 96.35000000000001%;"></div>
+<div class="image-view" data-width="438" data-height="422"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-e0f526dd1b5731be.png" data-original-width="438" data-original-height="422" data-original-format="image/png" data-original-filesize="23045" style="cursor: zoom-in;" class="image-loading"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div>
+<ul>
+<li>情景
+<ol>
+<li>用户先触摸到屏幕上<code>View C</code>上的某个点（图中黄区）</li>
+</ol>
+<blockquote>
+<p><code>Action_DOWN</code>事件在此处产生</p>
+</blockquote>
+<ol start="2">
+<li>用户移动手指</li>
+<li>最后离开屏幕</li>
+</ol>
+</li>
+</ul>
+<h3>5.2 一般的事件传递情况</h3>
+<p>一般的事件传递场景有：</p>
+<ul>
+<li>默认情况</li>
+<li>处理事件</li>
+<li>拦截<code>DOWN</code>事件</li>
+<li>拦截后续事件（<code>MOVE</code>、<code>UP</code>）</li>
+</ul>
+<h3>场景1：默认</h3>
+<ul>
+<li>即不对控件里的方法（<code>dispatchTouchEvent()</code>、<code>onTouchEvent()</code>、<code>onInterceptTouchEvent()</code>）进行重写 或 更改返回值</li>
+<li>那么调用的是这3个方法的默认实现：调用下层的方法 &amp; 逐层返回</li>
+<li>事件传递情况：（呈<code>U</code>型）
+<ol>
+<li>从上往下调用dispatchTouchEvent()</li>
+</ol>
+<blockquote>
+<p>Activity A -&gt;&gt; ViewGroup B -&gt;&gt; View C</p>
+</blockquote>
+<ol start="2">
+<li>从下往上调用onTouchEvent()</li>
+</ol>
+<blockquote>
+<p>View C -&gt;&gt; ViewGroup B -&gt;&gt; Activity A</p>
+</blockquote>
+</li>
+</ul>
+<div class="image-package">
+<div class="image-container" style="max-width: 700px; max-height: 795px;">
+<div class="image-container-fill" style="padding-bottom: 113.68%;"></div>
+<div class="image-view" data-width="1140" data-height="1296"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-161a6e6fc8723248.png" data-original-width="1140" data-original-height="1296" data-original-format="image/png" data-original-filesize="94169" style="cursor: zoom-in;" class="image-loading"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div>
+<blockquote>
+<p>注：虽然<code>ViewGroup B</code>的<code>onInterceptTouchEvent</code>（）对<code>DOWN</code>事件返回了<code>false</code>，但后续的事件<code>（MOVE、UP）</code>依然会传递给它的<code>onInterceptTouchEvent()</code><br>
+这一点与<code>onTouchEvent（）</code>的行为是不一样的：不再传递 &amp; 接收该事件列的其他事件</p>
+</blockquote>
+<h3>场景2：处理事件</h3>
+<p>设<code>View C</code>希望处理该点击事件，即：设置<code>View C</code>为可点击的<code>（Clickable）</code> 或 复写其<code>onTouchEvent（）</code>返回<code>true</code></p>
+<blockquote>
+<p>最常见的：设置<code>Button</code>按钮来响应点击事件</p>
+</blockquote>
+<p>事件传递情况：（如下图）</p>
+<ul>
+<li>
+<code>DOWN</code>事件被传递给C的<code>onTouchEvent</code>方法，该方法返回<code>true</code>，表示处理该事件</li>
+<li>因为<code>View C</code>正在处理该事件，那么<code>DOWN</code>事件将不再往上传递给ViewGroup B 和 <code>Activity A</code>的<code>onTouchEvent()</code>；</li>
+<li>该事件列的其他事件<code>（Move、Up）</code>也将传递给<code>View C</code>的<code>onTouchEvent()</code>
+</li>
+</ul>
+<div class="image-package">
+<div class="image-container" style="max-width: 700px; max-height: 795px;">
+<div class="image-container-fill" style="padding-bottom: 113.68%;"></div>
+<div class="image-view" data-width="1140" data-height="1296"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-77e933eb44682777.png" data-original-width="1140" data-original-height="1296" data-original-format="image/png" data-original-filesize="93574" style="cursor: zoom-in;" class="image-loading"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div>
+<blockquote>
+<p>会逐层往<code>dispatchTouchEvent()</code> 返回，最终事件分发结束</p>
+</blockquote>
+<h3>场景3：拦截DOWN事件</h3>
+<p>假设<code>ViewGroup B</code>希望处理该点击事件，即<code>ViewGroup B</code>复写了<code>onInterceptTouchEvent()</code>返回<code>true</code>、<code>onTouchEvent()</code>返回<code>true</code><br>
+事件传递情况：（如下图）</p>
+<ul>
+<li><p><code>DOWN</code>事件被传递给<code>ViewGroup B</code>的<code>onInterceptTouchEvent()</code>，该方法返回<code>true</code>，表示拦截该事件，即自己处理该事件（事件不再往下传递）</p></li>
+<li><p>调用自身的<code>onTouchEvent()</code>处理事件（<code>DOWN</code>事件将不再往上传递给<code>Activity A</code>的<code>onTouchEvent()</code>）</p></li>
+<li><p>该事件列的其他事件<code>（Move、Up）</code>将直接传递给<code>ViewGroup B</code>的<code>onTouchEvent()</code></p></li>
+</ul>
+<blockquote>
+<p>注：</p>
+<ol>
+<li>该事件列的其他事件<code>（Move、Up）</code>将不会再传递给<code>ViewGroup B</code>的<code>onInterceptTouchEvent</code>（）；因：该方法一旦返回一次<code>true</code>，就再也不会被调用</li>
+<li>逐层往<code>dispatchTouchEvent()</code> 返回，最终事件分发结束</li>
+</ol>
+</blockquote>
+<div class="image-package">
+<div class="image-container" style="max-width: 700px; max-height: 795px;">
+<div class="image-container-fill" style="padding-bottom: 113.68%;"></div>
+<div class="image-view" data-width="1140" data-height="1296"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-a5e7cfed2cba02c3.png" data-original-width="1140" data-original-height="1296" data-original-format="image/png" data-original-filesize="93447" style="cursor: zoom-in;" class="image-loading"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div>
+<h3>场景4：拦截DOWN的后续事件</h3>
+<p><strong>结论</strong></p>
+<ul>
+<li>若 <code>ViewGroup</code> 拦截了一个半路的事件（如<code>MOVE</code>），该事件将会被系统变成一个<code>CANCEL</code>事件 &amp; 传递给之前处理该事件的子<code>View</code>；</li>
+<li>该事件不会再传递给<code>ViewGroup</code> 的<code>onTouchEvent()</code>
+</li>
+<li>只有再到来的事件才会传递到<code>ViewGroup</code>的<code>onTouchEvent()</code>
+</li>
+</ul>
+<p><strong>场景描述</strong><br>
+<code>ViewGroup B</code> 无拦截<code>DOWN</code>事件（还是<code>View C</code>来处理<code>DOWN</code>事件），但它拦截了接下来的<code>MOVE</code>事件</p>
+<blockquote>
+<p>即 <code>DOWN</code>事件传递到<code>View C</code>的<code>onTouchEvent（）</code>，返回了<code>true</code></p>
+</blockquote>
+<p><strong>实例讲解</strong></p>
+<ul>
+<li>在后续到来的MOVE事件，<code>ViewGroup B</code> 的<code>onInterceptTouchEvent（）</code>返回<code>true</code>拦截该<code>MOVE</code>事件，但该事件并没有传递给<code>ViewGroup B</code> ；这个<code>MOVE</code>事件将会被系统变成一个<code>CANCEL</code>事件传递给<code>View C</code>的<code>onTouchEvent（）</code>
+</li>
+<li>后续又来了一个<code>MOVE</code>事件，该<code>MOVE</code>事件才会直接传递给<code>ViewGroup B</code> 的<code>onTouchEvent()</code>
+</li>
+</ul>
+<blockquote>
+<p>后续事件将直接传递给<code>ViewGroup B</code> 的<code>onTouchEvent()</code>处理，而不会再传递给<code>ViewGroup B</code> 的<code>onInterceptTouchEvent（）</code>，因该方法一旦返回一次true，就再也不会被调用了。</p>
+</blockquote>
+<ul>
+<li>
+<code>View C</code>再也不会收到该事件列产生的后续事件</li>
+</ul>
+<div class="image-package">
+<div class="image-container" style="max-width: 700px; max-height: 772px;">
+<div class="image-container-fill" style="padding-bottom: 110.41000000000001%;"></div>
+<div class="image-view" data-width="2440" data-height="2694"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-1599f532038686cd.png" data-original-width="2440" data-original-height="2694" data-original-format="image/png" data-original-filesize="301040" style="cursor: zoom-in;" class="image-loading"></div>
+</div>
+<div class="image-caption">示意图</div>
+</div>
+<p>至此，关于<code>Android</code>常见的事件传递情况 &amp; 流程已经讲解完毕。</p>
+<hr>
+<h1>6. 额外知识</h1>
+<h3>6.1 Touch事件的后续事件（MOVE、UP）层级传递</h3>
+<ul>
+<li>若给控件注册了<code>Touch</code>事件，每次点击都会触发一系列<code>action</code>事件（ACTION_DOWN，ACTION_MOVE，ACTION_UP等）</li>
+<li>当<code>dispatchTouchEvent（）</code>事件分发时，只有前一个事件（如ACTION_DOWN）返回true，才会收到后一个事件（ACTION_MOVE和ACTION_UP）</li>
+</ul>
+<blockquote>
+<p>即如果在执行ACTION_DOWN时返回false，后面一系列的ACTION_MOVE、ACTION_UP事件都不会执行</p>
+</blockquote>
+<p>从上面对事件分发机制分析知：</p>
+<ul>
+<li>dispatchTouchEvent()、 onTouchEvent() 消费事件、终结事件传递（返回true）</li>
+<li>而onInterceptTouchEvent 并不能消费事件，它相当于是一个分叉口起到分流导流的作用，对后续的ACTION_MOVE和ACTION_UP事件接收起到非常大的作用</li>
+</ul>
+<blockquote>
+<p>请记住：接收了ACTION_DOWN事件的函数不一定能收到后续事件（ACTION_MOVE、ACTION_UP）</p>
+</blockquote>
+<p><strong>这里给出ACTION_MOVE和ACTION_UP事件的传递结论</strong>：</p>
+<ul>
+<li>结论1<br>
+若对象（Activity、ViewGroup、View）的dispatchTouchEvent()分发事件后消费了事件（返回true），那么收到ACTION_DOWN的函数也能收到ACTION_MOVE和ACTION_UP</li>
+</ul>
+<blockquote>
+<p>黑线：ACTION_DOWN事件传递方向<br>
+红线：ACTION_MOVE 、 ACTION_UP事件传递方向</p>
+</blockquote>
+<div class="image-package">
+<div class="image-container" style="max-width: 700px; max-height: 294px;">
+<div class="image-container-fill" style="padding-bottom: 42.02%;"></div>
+<div class="image-view" data-width="1880" data-height="790"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-93d0b1496e9e6ca4.png" data-original-width="1880" data-original-height="790" data-original-format="image/png" data-original-filesize="61151" style="cursor: zoom-in;" class="image-loading"></div>
+</div>
+<div class="image-caption">流程讲解</div>
+</div>
+<ul>
+<li>结论2<br>
+若对象（Activity、ViewGroup、View）的onTouchEvent()处理了事件（返回true），那么ACTION_MOVE、ACTION_UP的事件从上往下传到该<code>View</code>后就不再往下传递，而是直接传给自己的<code>onTouchEvent()</code>&amp; 结束本次事件传递过程。</li>
+</ul>
+<blockquote>
+<p>黑线：ACTION_DOWN事件传递方向<br>
+红线：ACTION_MOVE、ACTION_UP事件传递方向</p>
+</blockquote>
+<div class="image-package">
+<div class="image-container" style="max-width: 700px; max-height: 308px;">
+<div class="image-container-fill" style="padding-bottom: 44.13%;"></div>
+<div class="image-view" data-width="1790" data-height="790"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-9d639a0b9ebf7b4a.png" data-original-width="1790" data-original-height="790" data-original-format="image/png" data-original-filesize="62207" style="cursor: zoom-in;" class="image-loading"></div>
+</div>
+<div class="image-caption">流程讲解</div>
+</div>
+<h3>6.2 onTouch()和onTouchEvent()的区别</h3>
+<ul>
+<li>该2个方法都是在<code>View.dispatchTouchEvent（）</code>中调用</li>
+<li>但<code>onTouch（）</code>优先于<code>onTouchEvent</code>执行；若手动复写在<code>onTouch（）</code>中返回<code>true</code>（即 将事件消费掉），将不会再执行<code>onTouchEvent（）</code>
+</li>
+</ul>
+<blockquote>
+<p>注：若1个控件不可点击（即非<code>enable</code>），那么给它注册<code>onTouch</code>事件将永远得不到执行，具体原因看如下代码</p>
+</blockquote>
+<pre class="hljs java"><code class="java"><span class="hljs-comment">// &amp;&amp;为短路与，即如果前面条件为false，将不再往下执行</span>
+<span class="hljs-comment">//  故：onTouch（）能够得到执行需2个前提条件：</span>
+     <span class="hljs-comment">// 1. mOnTouchListener的值不能为空</span>
+     <span class="hljs-comment">// 2. 当前点击的控件必须是enable的</span>
+mOnTouchListener != <span class="hljs-keyword">null</span> &amp;&amp; (mViewFlags &amp; ENABLED_MASK) == ENABLED &amp;&amp;  
+            mOnTouchListener.onTouch(<span class="hljs-keyword">this</span>, event)
+
+<span class="hljs-comment">// 对于该类控件，若需监听它的touch事件，就必须通过在该控件中重写onTouchEvent（）来实现</span>
+</code></pre>
+<hr>
+<h1>7. 总结</h1>
+<ul>
+<li><p>通过阅读本文，相信您已经可以全面了解<code>Android</code>事件分发机制</p></li>
+<li><p>与<code>Android</code>事件分发最相关的知识：<strong>自定义View</strong>系列文章<br>
+<a href="https://www.jianshu.com/p/146e5cec4863" target="_blank">（1）自定义View基础 - 最易懂的自定义View原理系列</a><br>
+<a href="https://www.jianshu.com/p/1dab927b2f36" target="_blank">（2）自定义View Measure过程 - 最易懂的自定义View原理系列</a><br>
+<a href="https://www.jianshu.com/p/158736a2549d" target="_blank">（3）自定义View Layout过程 - 最易懂的自定义View原理系列</a><br>
+<a href="https://www.jianshu.com/p/95afeb7c8335" target="_blank">（4）自定义View Draw过程- 最易懂的自定义View原理系列</a></p></li>
+<li><p>接下来我将继续介绍与<code>Android</code>事件分发最相关的知识：<strong>自定义View</strong>，有兴趣可以继续关注<a href="https://www.jianshu.com/users/383970bef0a0/latest_articles" target="_blank">Carson_Ho的安卓开发笔记</a></p></li>
+</ul>
+<hr>
+<h4>请点赞！因为你们的赞同/鼓励是我写作的最大动力！</h4>
+<blockquote>
+<p><strong>相关文章阅读</strong><br>
+<a href="https://www.jianshu.com/p/ec5a1a30694b" target="_blank">Android开发：最全面、最易懂的Android屏幕适配解决方案</a><br>
+<a href="https://www.jianshu.com/p/b61a49e0279f" target="_blank">Android开发：史上最全的Android消息推送解决方案</a><br>
+<a href="https://www.jianshu.com/p/3c94ae673e2a" target="_blank">Android开发：最全面、最易懂的Webview详解</a><br>
+<a href="https://www.jianshu.com/p/b87fee2f7a23" target="_blank">Android开发：JSON简介及最全面解析方法!</a><br>
+<a href="https://www.jianshu.com/p/d963c55c3ab9" target="_blank">Android四大组件：Service服务史上最全面解析</a><br>
+<a href="https://www.jianshu.com/p/ca3d87a4cdf3" target="_blank">Android四大组件：BroadcastReceiver史上最全面解析</a></p>
+</blockquote>
+<hr>
+<h3>欢迎关注<a href="https://www.jianshu.com/users/383970bef0a0/latest_articles" target="_blank">Carson_Ho</a>的简书！</h3>
+<p>不定期分享关于<strong>安卓开发</strong>的干货，追求<strong>短、平、快</strong>，但<strong>却不缺深度</strong>。</p>
+<div class="image-package">
+<div class="image-container" style="max-width: 700px; max-height: 716px;">
+<div class="image-container-fill" style="padding-bottom: 102.38000000000001%;"></div>
+<div class="image-view" data-width="840" data-height="860"><img data-original-src="//upload-images.jianshu.io/upload_images/944365-9b76fa3c52d478a7.png" data-original-width="840" data-original-height="860" data-original-format="image/png" data-original-filesize="537233" style="cursor: zoom-in;" class="image-loading"></div>
+</div>
+<div class="image-caption"></div>
+</div>
+
+          </div>
+        </div>
+    </div>
+
+    <!-- 如果是付费文章，未购买，则显示购买按钮 -->
+
+    <!-- 连载目录项 -->
+      <div class="book-menu">
+        <div class="menu-item">
+            <a href="https://www.jianshu.com/p/146e5cec4863">
+              <i class="iconfont ic-previous-s"></i>上一篇
+            </a>
+        </div>
+        <div class="menu-item">
+          <a id="openBookChapterBtn" href="javascript:;">目录</a>
+        </div>
+        <div class="menu-item">
+            <a href="https://www.jianshu.com/p/762b490403c3">
+              下一篇<i class="iconfont ic-next-s"></i>
+            </a>
+        </div>
+      </div>
+      <!---->
+
+    <!-- 如果是付费文章 -->
+      <!-- 如果是付费连载，已购买，且作者允许赞赏，则显示付费信息和赞赏 -->
+        <div id="free-reward-panel" class="support-author"><p>小礼物走一走，来简书关注我</p> <div class="btn btn-pay">赞赏支持</div> <div class="supporter"><ul class="support-list"><li><a target="_blank" href="https://www.jianshu.com/u/70a8f4edb323" class="avatar"><img src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/45446208-5b5f-4f24-a460-69abd203a254.jpg"></a></li><li><a target="_blank" href="javascript:void(0)" class="avatar"><img src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/wechat-771371d5741b0c32cd805caeb48ad6c0.png"></a></li><li><a target="_blank" href="https://www.jianshu.com/u/209e63bf5787" class="avatar"><img src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/9-cceda3cf5072bcdd77e8ca4f21c40998.jpg"></a></li><li><a target="_blank" href="https://www.jianshu.com/u/7e0450a01daf" class="avatar"><img src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/dad09f6f-1ec2-4ae2-b0cc-355b753f406b.jpg"></a></li><li><a target="_blank" href="https://www.jianshu.com/u/b2c3cd15b487" class="avatar"><img src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/be0e40449e92.jpg"></a></li><li><a target="_blank" href="https://www.jianshu.com/u/a3de4510d7e6" class="avatar"><img src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/4e6b0cf4-86ae-46bf-b00b-aa104fb7aaaa.jpg"></a></li><li><a target="_blank" href="https://www.jianshu.com/u/4f09579c8385" class="avatar"><img src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/e3ef744a2466"></a></li></ul> <span>等11人</span></div> <!----> <!----></div>
+
+      <div class="show-foot">
+        <a class="notebook" href="https://www.jianshu.com/nb/9976005">
+          <i class="iconfont ic-search-notebook"></i>
+          <span>自定义View、动画</span>
+</a>        <div class="copyright" data-toggle="tooltip" data-html="true" data-original-title="转载请联系作者获得授权，并标注“简书作者”。">
+          © 著作权归作者所有
+        </div>
+        <div class="modal-wrap" data-report-note="">
+          <a id="report-modal">举报文章</a>
+        </div>
+      </div>
+
+      <!-- 文章底部连载信息 -->
+        <div id="note-book-info">
+          <a href="https://www.jianshu.com/nb/9976005" class="banner">
+            <img src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/9d060ba8-68a0-4617-9691-22307934bffb.png" alt="">
+          </a>
+          <div class="info">
+            <a href="https://www.jianshu.com/nb/9976005" class="title">
+              自定义View、动画
+            </a>
+            <div class="meta">
+              <span>4.1万字 </span>
+              ·
+              <span>18.8万阅读</span>
+              ·
+              <span>142人关注</span>
+            </div>
+            <div class="summary">
+                
+            </div>
+            <a class="btn btn-success follow"><i class="iconfont ic-follow"></i> <span>关注</span></a>
+          </div>
+        </div>
+
+    <div class="meta-bottom">
+      <div data-v-6ddd02c6="" class="like"><div data-v-6ddd02c6="" class="btn like-group"><div data-v-6ddd02c6="" class="btn-like"><a data-v-6ddd02c6="">喜欢</a></div> <div data-v-6ddd02c6="" class="modal-wrap"><a data-v-6ddd02c6="">754</a></div></div> <!----></div>
+      <div class="share-group">
+        <a class="share-circle" data-action="weixin-share" data-toggle="tooltip" data-original-title="分享到微信">
+          <i class="iconfont ic-wechat"></i>
+        </a>
+        <a class="share-circle" data-action="weibo-share" data-toggle="tooltip" href="javascript:void((function(s,d,e,r,l,p,t,z,c){var%20f=&#39;http://v.t.sina.com.cn/share/share.php?appkey=1881139527&#39;,u=z||d.location,p=[&#39;&amp;url=&#39;,e(u),&#39;&amp;title=&#39;,e(t||d.title),&#39;&amp;source=&#39;,e(r),&#39;&amp;sourceUrl=&#39;,e(l),&#39;&amp;content=&#39;,c||&#39;gb2312&#39;,&#39;&amp;pic=&#39;,e(p||&#39;&#39;)].join(&#39;&#39;);function%20a(){if(!window.open([f,p].join(&#39;&#39;),&#39;mb&#39;,[&#39;toolbar=0,status=0,resizable=1,width=440,height=430,left=&#39;,(s.width-440)/2,&#39;,top=&#39;,(s.height-430)/2].join(&#39;&#39;)))u.href=[f,p].join(&#39;&#39;);};if(/Firefox/.test(navigator.userAgent))setTimeout(a,0);else%20a();})(screen,document,encodeURIComponent,&#39;&#39;,&#39;&#39;,&#39;http://cwb.assets.jianshu.io/notes/images/6978588/weibo/image_27481491a8d4.png&#39;, &#39;推荐 @何家成___ 的文章《Android事件分发机制详解：史上最全面、最易懂》（ 分享自 @简书 ）&#39;,&#39;https://www.jianshu.com/p/38015afcdb58?utm_campaign=maleskine&amp;utm_content=note&amp;utm_medium=reader_share&amp;utm_source=weibo&#39;,&#39;页面编码gb2312|utf-8默认gb2312&#39;));" data-original-title="分享到微博">
+          <i class="iconfont ic-weibo"></i>
+        </a>
+          <a class="share-circle" data-toggle="tooltip" href="http://cwb.assets.jianshu.io/notes/images/6978588/weibo/image_27481491a8d4.png" target="_blank" data-original-title="下载长微博图片">
+            <i class="iconfont ic-picture"></i>
+          </a>
+        <a class="share-circle more-share" tabindex="0" data-toggle="popover" data-placement="top" data-html="true" data-trigger="focus" href="javascript:void(0);" data-content="
+          &lt;ul class=&quot;share-list&quot;&gt;
+            &lt;li&gt;&lt;a href=&quot;javascript:void(function(){var d=document,e=encodeURIComponent,r=&#39;http://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=&#39;+e(&#39;https://www.jianshu.com/p/38015afcdb58?utm_campaign=maleskine&amp;utm_content=note&amp;utm_medium=reader_share&amp;utm_source=qzone&#39;)+&#39;&amp;title=&#39;+e(&#39;推荐 Carson_Ho 的文章《Android事件分发机制详解：史上最全面、最易懂》&#39;),x=function(){if(!window.open(r,&#39;qzone&#39;,&#39;toolbar=0,resizable=1,scrollbars=yes,status=1,width=600,height=600&#39;))location.href=r};if(/Firefox/.test(navigator.userAgent)){setTimeout(x,0)}else{x()}})();&quot;&gt;&lt;i class=&quot;social-icon-sprite social-icon-zone&quot;&gt;&lt;/i&gt;&lt;span&gt;分享到QQ空间&lt;/span&gt;&lt;/a&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href=&quot;javascript:void(function(){var d=document,e=encodeURIComponent,r=&#39;https://twitter.com/share?url=&#39;+e(&#39;https://www.jianshu.com/p/38015afcdb58?utm_campaign=maleskine&amp;utm_content=note&amp;utm_medium=reader_share&amp;utm_source=twitter&#39;)+&#39;&amp;text=&#39;+e(&#39;推荐 Carson_Ho 的文章《Android事件分发机制详解：史上最全面、最易懂》（ 分享自 @jianshucom ）&#39;)+&#39;&amp;related=&#39;+e(&#39;jianshucom&#39;),x=function(){if(!window.open(r,&#39;twitter&#39;,&#39;toolbar=0,resizable=1,scrollbars=yes,status=1,width=600,height=600&#39;))location.href=r};if(/Firefox/.test(navigator.userAgent)){setTimeout(x,0)}else{x()}})();&quot;&gt;&lt;i class=&quot;social-icon-sprite social-icon-twitter&quot;&gt;&lt;/i&gt;&lt;span&gt;分享到Twitter&lt;/span&gt;&lt;/a&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href=&quot;javascript:void(function(){var d=document,e=encodeURIComponent,r=&#39;https://www.facebook.com/dialog/share?app_id=483126645039390&amp;display=popup&amp;href=https://www.jianshu.com/p/38015afcdb58?utm_campaign=maleskine&amp;utm_content=note&amp;utm_medium=reader_share&amp;utm_source=facebook&#39;,x=function(){if(!window.open(r,&#39;facebook&#39;,&#39;toolbar=0,resizable=1,scrollbars=yes,status=1,width=450,height=330&#39;))location.href=r};if(/Firefox/.test(navigator.userAgent)){setTimeout(x,0)}else{x()}})();&quot;&gt;&lt;i class=&quot;social-icon-sprite social-icon-facebook&quot;&gt;&lt;/i&gt;&lt;span&gt;分享到Facebook&lt;/span&gt;&lt;/a&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href=&quot;javascript:void(function(){var d=document,e=encodeURIComponent,r=&#39;https://plus.google.com/share?url=&#39;+e(&#39;https://www.jianshu.com/p/38015afcdb58?utm_campaign=maleskine&amp;utm_content=note&amp;utm_medium=reader_share&amp;utm_source=google_plus&#39;),x=function(){if(!window.open(r,&#39;google_plus&#39;,&#39;toolbar=0,resizable=1,scrollbars=yes,status=1,width=450,height=330&#39;))location.href=r};if(/Firefox/.test(navigator.userAgent)){setTimeout(x,0)}else{x()}})();&quot;&gt;&lt;i class=&quot;social-icon-sprite social-icon-google&quot;&gt;&lt;/i&gt;&lt;span&gt;分享到Google+&lt;/span&gt;&lt;/a&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href=&quot;javascript:void(function(){var d=document,e=encodeURIComponent,s1=window.getSelection,s2=d.getSelection,s3=d.selection,s=s1?s1():s2?s2():s3?s3.createRange().text:&#39;&#39;,r=&#39;http://www.douban.com/recommend/?url=&#39;+e(&#39;https://www.jianshu.com/p/38015afcdb58?utm_campaign=maleskine&amp;utm_content=note&amp;utm_medium=reader_share&amp;utm_source=douban&#39;)+&#39;&amp;title=&#39;+e(&#39;Android事件分发机制详解：史上最全面、最易懂&#39;)+&#39;&amp;sel=&#39;+e(s)+&#39;&amp;v=1&#39;,x=function(){if(!window.open(r,&#39;douban&#39;,&#39;toolbar=0,resizable=1,scrollbars=yes,status=1,width=450,height=330&#39;))location.href=r+&#39;&amp;r=1&#39;};if(/Firefox/.test(navigator.userAgent)){setTimeout(x,0)}else{x()}})()&quot;&gt;&lt;i class=&quot;social-icon-sprite social-icon-douban&quot;&gt;&lt;/i&gt;&lt;span&gt;分享到豆瓣&lt;/span&gt;&lt;/a&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        " data-original-title="" title="">更多分享</a>
+      </div>
+    </div>
+      <a id="web-note-ad-1" target="_blank" href="https://www.jianshu.com/apps/download?utm_source=nbc"><img src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/web-note-ad-1-10f08e404d3887d2d45a4bc8f1831403.png" alt="Web note ad 1"></a>
+    <div id="vue_comment"></div>
+  </div>
+
+  <div class="side-tool"><ul><li data-placement="left" data-toggle="tooltip" data-container="body" data-original-title="回到顶部" style=""><a class="function-button"><i class="iconfont ic-backtop"></i></a></li> <!----> <!----> <!----> <li data-placement="left" data-toggle="tooltip" data-container="body" data-original-title="分享文章"><a tabindex="0" role="button" data-toggle="popover" data-placement="left" data-html="true" data-trigger="focus" href="javascript:void(0);" data-content="&lt;ul class=&#39;share-list&#39;&gt;
+                &lt;li&gt;&lt;a class=&quot;weixin-share&quot;&gt;&lt;i class=&quot;social-icon-sprite social-icon-weixin&quot;&gt;&lt;/i&gt;&lt;span&gt;分享到微信&lt;/span&gt;&lt;/a&gt;&lt;/li&gt;
+                &lt;li&gt;&lt;a href=&quot;javascript:void((function(s,d,e,r,l,p,t,z,c){var%20f=&#39;http://v.t.sina.com.cn/share/share.php?appkey=1881139527&#39;,u=z||d.location,p=[&#39;&amp;url=&#39;,e(u),&#39;&amp;title=&#39;,e(t||d.title),&#39;&amp;source=&#39;,e(r),&#39;&amp;sourceUrl=&#39;,e(l),&#39;&amp;content=&#39;,c||&#39;gb2312&#39;,&#39;&amp;pic=&#39;,e(p||&#39;&#39;)].join(&#39;&#39;);function%20a(){if(!window.open([f,p].join(&#39;&#39;),&#39;mb&#39;,[&#39;toolbar=0,status=0,resizable=1,width=440,height=430,left=&#39;,(s.width-440)/2,&#39;,top=&#39;,(s.height-430)/2].join(&#39;&#39;)))u.href=[f,p].join(&#39;&#39;);};if(/Firefox/.test(navigator.userAgent))setTimeout(a,0);else%20a();})(screen,document,encodeURIComponent,&#39;&#39;,&#39;&#39;,&#39;http://cwb.assets.jianshu.io/notes/images/6978588/weibo/image_27481491a8d4.png&#39;, &#39;推荐 @何家成___ 的文章《Android事件分发机制详解：史上最全面、最易懂》（ 分享自 @简书 ）&#39;,&#39;https://www.jianshu.com/p/38015afcdb58?utm_campaign=maleskine&amp;utm_content=note&amp;utm_medium=reader_share&amp;utm_source=weibo&#39;,&#39;页面编码gb2312|utf-8默认gb2312&#39;));&quot;&gt;&lt;i class=&#39;social-icon-sprite social-icon-weibo&#39;&gt;&lt;/i&gt;&lt;span&gt;分享到微博&lt;/span&gt;&lt;/a&gt;&lt;/li&gt;
+                &lt;li&gt;&lt;a href=&quot;http://cwb.assets.jianshu.io/notes/images/6978588/weibo/image_27481491a8d4.png&quot; target=&quot;_blank&quot;&gt;&lt;i class=&quot;social-icon-sprite social-icon-picture&quot;&gt;&lt;/i&gt;&lt;span&gt;下载长微博图片&lt;/span&gt;&lt;/a&gt;&lt;/li&gt;
+                &lt;li&gt;&lt;a href=&quot;javascript:void(function(){var d=document,e=encodeURIComponent,r=&#39;http://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=&#39;+e(&#39;https://www.jianshu.com/p/38015afcdb58?utm_campaign=maleskine&amp;utm_content=note&amp;utm_medium=reader_share&amp;utm_source=qzone&#39;)+&#39;&amp;title=&#39;+e(&#39;推荐 Carson_Ho 的文章《Android事件分发机制详解：史上最全面、最易懂》&#39;),x=function(){if(!window.open(r,&#39;qzone&#39;,&#39;toolbar=0,resizable=1,scrollbars=yes,status=1,width=600,height=600&#39;))location.href=r};if(/Firefox/.test(navigator.userAgent)){setTimeout(x,0)}else{x()}})();&quot;&gt;&lt;i class=&#39;social-icon-sprite social-icon-zone&#39;&gt;&lt;/i&gt;&lt;span&gt;分享到QQ空间&lt;/span&gt;&lt;/a&gt;&lt;/li&gt;
+                &lt;li&gt;&lt;a href=&quot;javascript:void(function(){var d=document,e=encodeURIComponent,r=&#39;https://twitter.com/share?url=&#39;+e(&#39;https://www.jianshu.com/p/38015afcdb58?utm_campaign=maleskine&amp;utm_content=note&amp;utm_medium=reader_share&amp;utm_source=twitter&#39;)+&#39;&amp;text=&#39;+e(&#39;推荐 Carson_Ho 的文章《Android事件分发机制详解：史上最全面、最易懂》（ 分享自 @jianshucom ）&#39;)+&#39;&amp;related=&#39;+e(&#39;jianshucom&#39;),x=function(){if(!window.open(r,&#39;twitter&#39;,&#39;toolbar=0,resizable=1,scrollbars=yes,status=1,width=600,height=600&#39;))location.href=r};if(/Firefox/.test(navigator.userAgent)){setTimeout(x,0)}else{x()}})();&quot;&gt;&lt;i class=&#39;social-icon-sprite social-icon-twitter&#39;&gt;&lt;/i&gt;&lt;span&gt;分享到Twitter&lt;/span&gt;&lt;/a&gt;&lt;/li&gt;
+                &lt;li&gt;&lt;a href=&quot;javascript:void(function(){var d=document,e=encodeURIComponent,r=&#39;https://www.facebook.com/dialog/share?app_id=483126645039390&amp;display=popup&amp;href=https://www.jianshu.com/p/38015afcdb58?utm_campaign=maleskine&amp;utm_content=note&amp;utm_medium=reader_share&amp;utm_source=facebook&#39;,x=function(){if(!window.open(r,&#39;facebook&#39;,&#39;toolbar=0,resizable=1,scrollbars=yes,status=1,width=450,height=330&#39;))location.href=r};if(/Firefox/.test(navigator.userAgent)){setTimeout(x,0)}else{x()}})();&quot;&gt;&lt;i class=&#39;social-icon-sprite social-icon-facebook&#39;&gt;&lt;/i&gt;&lt;span&gt;分享到Facebook&lt;/span&gt;&lt;/a&gt;&lt;/li&gt;
+                &lt;li&gt;&lt;a href=&quot;javascript:void(function(){var d=document,e=encodeURIComponent,r=&#39;https://plus.google.com/share?url=&#39;+e(&#39;https://www.jianshu.com/p/38015afcdb58?utm_campaign=maleskine&amp;utm_content=note&amp;utm_medium=reader_share&amp;utm_source=google_plus&#39;),x=function(){if(!window.open(r,&#39;google_plus&#39;,&#39;toolbar=0,resizable=1,scrollbars=yes,status=1,width=450,height=330&#39;))location.href=r};if(/Firefox/.test(navigator.userAgent)){setTimeout(x,0)}else{x()}})();&quot;&gt;&lt;i class=&#39;social-icon-sprite social-icon-google&#39;&gt;&lt;/i&gt;&lt;span&gt;分享到Google+&lt;/span&gt;&lt;/a&gt;&lt;/li&gt;
+                &lt;li&gt;&lt;a href=&quot;javascript:void(function(){var d=document,e=encodeURIComponent,s1=window.getSelection,s2=d.getSelection,s3=d.selection,s=s1?s1():s2?s2():s3?s3.createRange().text:&#39;&#39;,r=&#39;http://www.douban.com/recommend/?url=&#39;+e(&#39;https://www.jianshu.com/p/38015afcdb58?utm_campaign=maleskine&amp;utm_content=note&amp;utm_medium=reader_share&amp;utm_source=douban&#39;)+&#39;&amp;title=&#39;+e(&#39;Android事件分发机制详解：史上最全面、最易懂&#39;)+&#39;&amp;sel=&#39;+e(s)+&#39;&amp;v=1&#39;,x=function(){if(!window.open(r,&#39;douban&#39;,&#39;toolbar=0,resizable=1,scrollbars=yes,status=1,width=450,height=330&#39;))location.href=r+&#39;&amp;r=1&#39;};if(/Firefox/.test(navigator.userAgent)){setTimeout(x,0)}else{x()}})()&quot;&gt;&lt;i class=&#39;social-icon-sprite social-icon-douban&#39;&gt;&lt;/i&gt;&lt;span&gt;分享到豆瓣&lt;/span&gt;&lt;/a&gt;&lt;/li&gt;
+              &lt;/ul&gt;" data-original-title="" title="" class="function-button"><i class="iconfont ic-share"></i></a> <!----></li> <!----></ul></div>
+</div>
+<div class="note-bottom">
+  <div><div class="main"><div class="title">被以下专题收入，发现更多相似内容</div> <!----> <div class="include-collection"><!----> <a href="https://www.jianshu.com/c/d1591c322c89?utm_source=desktop&amp;utm_medium=notes-included-collection" target="_blank" class="item"><img src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/android.graphics.Bitmap_15f127c2.jpeg"><div class="name">Android开发</div></a><a href="https://www.jianshu.com/c/3fde3b545a35?utm_source=desktop&amp;utm_medium=notes-included-collection" target="_blank" class="item"><img src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/android.graphics.Bitmap_3d178cba.jpeg"><div class="name">Android知识</div></a><a href="https://www.jianshu.com/c/fcb4441f168d?utm_source=desktop&amp;utm_medium=notes-included-collection" target="_blank" class="item"><img src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/android.graphics.Bitmap_9de5474.jpeg"><div class="name">Android...</div></a><a href="https://www.jianshu.com/c/52b64f3155e1?utm_source=desktop&amp;utm_medium=notes-included-collection" target="_blank" class="item"><img src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/android.graphics.Bitmap_5a534bd.jpeg"><div class="name">手机移动程序开发</div></a><a href="https://www.jianshu.com/c/2192c9c0fc87?utm_source=desktop&amp;utm_medium=notes-included-collection" target="_blank" class="item"><img src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/1473213961.jpg"><div class="name">android技术</div></a><a href="https://www.jianshu.com/c/94daff2f373b?utm_source=desktop&amp;utm_medium=notes-included-collection" target="_blank" class="item"><img src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/android.graphics.Bitmap_3caed12.jpeg"><div class="name">Android开发者</div></a><a href="https://www.jianshu.com/c/85e2f47ff0e5?utm_source=desktop&amp;utm_medium=notes-included-collection" target="_blank" class="item"><img src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/android.graphics.Bitmap_4d18e21.jpeg"><div class="name">琐碎知识点</div></a> <a class="show-more">
+        展开更多
+        <i class="iconfont ic-show"></i></a></div></div> <!----> <!----></div>
+  <div data-vcomp="recommended-notes" data-note-id="6978588"></div>
+  <!-- 相关文章 -->
+  <div class="seo-recommended-notes">
+
+        <div class="note have-img">
+          <a class="cover" target="_blank" href="https://www.jianshu.com/p/d79458c03174?utm_campaign=maleskine&amp;utm_content=note&amp;utm_medium=seo_notes&amp;utm_source=recommendation">
+            <img src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/1869441-23f370f6e05f1245.png" alt="240">
+</a>          <a class="title" target="_blank" href="https://www.jianshu.com/p/d79458c03174?utm_campaign=maleskine&amp;utm_content=note&amp;utm_medium=seo_notes&amp;utm_source=recommendation">第六章 Android 开发中的View和事件分发机制</a>
+          <p class="description">1. 概述   作为Android开发中最常见的一个控件,个人觉得有必要谈谈了。我们刚开始接触Android的时候最常见的一些基本控件就有TextView,EditText,Button......，但是细心的你会发现它们的父类都是View。但是View也不能单纯是一个控件...</p>
+          <a class="author" target="_blank" href="https://www.jianshu.com/u/fa19fba4ef18?utm_campaign=maleskine&amp;utm_content=user&amp;utm_medium=seo_notes&amp;utm_source=recommendation">
+            <div class="avatar">
+              <img src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/30ef0ee0-eb94-433f-8ffb-28934103f2d5.jpg" alt="48">
+            </div>
+            <span class="name">忆念成风</span>
+</a>        </div>
+
+        <div class="note ">
+                    <a class="title" target="_blank" href="https://www.jianshu.com/p/296d6a5a5a67?utm_campaign=maleskine&amp;utm_content=note&amp;utm_medium=seo_notes&amp;utm_source=recommendation">《Android深入透析》之Android事件分发机制</a>
+          <p class="description">一、   Android分发机制概述： Android如此受欢迎，就在于其优秀的交互性，这其中，Android优秀的事件分发机制功不可没。那么，作为一个优秀的程序员，要想做一个具有良好交互性的应用，必须透彻理解Android的事件分发机制。 要想充分理解android的分发...</p>
+          <a class="author" target="_blank" href="https://www.jianshu.com/u/5fe26a4eb12b?utm_campaign=maleskine&amp;utm_content=user&amp;utm_medium=seo_notes&amp;utm_source=recommendation">
+            <div class="avatar">
+              <img src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/bf6c8fc0bbb3.PNG" alt="48">
+            </div>
+            <span class="name">IT枫</span>
+</a>        </div>
+
+        <div class="note have-img">
+          <a class="cover" target="_blank" href="https://www.jianshu.com/p/7cf6eb4ce7a9?utm_campaign=maleskine&amp;utm_content=note&amp;utm_medium=seo_notes&amp;utm_source=recommendation">
+            <img src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/966283-b9cb65aceea9219b.png" alt="240">
+</a>          <a class="title" target="_blank" href="https://www.jianshu.com/p/7cf6eb4ce7a9?utm_campaign=maleskine&amp;utm_content=note&amp;utm_medium=seo_notes&amp;utm_source=recommendation">图解 Android 事件分发机制</a>
+          <p class="description">在Android开发中，事件分发机制是一块Android比较重要的知识体系，了解并熟悉整套的分发机制有助于更好的分析各种点击滑动失效问题，更好去扩展控件的事件功能和开发自定义控件，同时事件分发机制也是Android面试必问考点之一，如果你能把下面的一些事件分发图当场画出来肯...</p>
+          <a class="author" target="_blank" href="https://www.jianshu.com/u/a52e02baf9b7?utm_campaign=maleskine&amp;utm_content=user&amp;utm_medium=seo_notes&amp;utm_source=recommendation">
+            <div class="avatar">
+              <img src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/6f5e469a-4b17-4e9a-b6d8-9e73020f463e.jpg" alt="48">
+            </div>
+            <span class="name">Jwenzhu</span>
+</a>        </div>
+
+        <div class="note have-img">
+          <a class="cover" target="_blank" href="https://www.jianshu.com/p/b1d992f6e25b?utm_campaign=maleskine&amp;utm_content=note&amp;utm_medium=seo_notes&amp;utm_source=recommendation">
+            <img src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/1811893-a3acfb47fadae79a.jpg" alt="240">
+</a>          <a class="title" target="_blank" href="https://www.jianshu.com/p/b1d992f6e25b?utm_campaign=maleskine&amp;utm_content=note&amp;utm_medium=seo_notes&amp;utm_source=recommendation">Android Touch事件分发机制详解之由点击引发的战争</a>
+          <p class="description">更多分享：http://www.cherylgood.cn 之前我们在Scroller的使用详解中，在onMeasure方法中可能你会看到 childView.setClickable(true);为什么要设置childView为true呢，假如不设置的话，你会发现ACTI...</p>
+          <a class="author" target="_blank" href="https://www.jianshu.com/u/1c1b7ff9e3ec?utm_campaign=maleskine&amp;utm_content=user&amp;utm_medium=seo_notes&amp;utm_source=recommendation">
+            <div class="avatar">
+              <img src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/7-0993d41a595d6ab6ef17b19496eb2f21.jpg" alt="48">
+            </div>
+            <span class="name">Angels_安杰</span>
+</a>        </div>
+
+        <div class="note have-img">
+          <a class="cover" target="_blank" href="https://www.jianshu.com/p/a4f82b7a440e?utm_campaign=maleskine&amp;utm_content=note&amp;utm_medium=seo_notes&amp;utm_source=recommendation">
+            <img src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/3009289-3e607181f8bd7309.png" alt="240">
+</a>          <a class="title" target="_blank" href="https://www.jianshu.com/p/a4f82b7a440e?utm_campaign=maleskine&amp;utm_content=note&amp;utm_medium=seo_notes&amp;utm_source=recommendation">【总结】事件分发机制</a>
+          <p class="description">通常，开发人员所涉及到的事件分发机制涉及到了如下几个方法 dispatchTouchEvent(MotionEvent ev)用来进行事件分发。如果事件能传递给当前的View，那么此方法一定会被调用。 onInterceptTouchEvent(MotionEvent ev...</p>
+          <a class="author" target="_blank" href="https://www.jianshu.com/u/67b6d4fea030?utm_campaign=maleskine&amp;utm_content=user&amp;utm_medium=seo_notes&amp;utm_source=recommendation">
+            <div class="avatar">
+              <img src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/695444c2-24d0-4bdc-85d6-5fff617ec431.jpg" alt="48">
+            </div>
+            <span class="name">械勒的时间</span>
+</a>        </div>
+
+        <div class="note ">
+                    <a class="title" target="_blank" href="https://www.jianshu.com/p/6f930a262679?utm_campaign=maleskine&amp;utm_content=note&amp;utm_medium=seo_notes&amp;utm_source=recommendation">2017年2月26</a>
+          <p class="description">人生的选择真是一步错步步错，有些选择尚可借着时间来弥补，可有些，错过了就是错过了，再也回不了头。</p>
+          <a class="author" target="_blank" href="https://www.jianshu.com/u/ec4513843b06?utm_campaign=maleskine&amp;utm_content=user&amp;utm_medium=seo_notes&amp;utm_source=recommendation">
+            <div class="avatar">
+              <img src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/afe0f9b4772b.jpg" alt="48">
+            </div>
+            <span class="name">玉烟浮</span>
+</a>        </div>
+
+        <div class="note ">
+                    <a class="title" target="_blank" href="https://www.jianshu.com/p/2319b780e49f?utm_campaign=maleskine&amp;utm_content=note&amp;utm_medium=seo_notes&amp;utm_source=recommendation">118</a>
+          <p class="description">这个世界上最伟大的是光荣的胜利比光荣的胜利更伟大的是诚实的失败：诚实的失败证明我们曾经尝试过不可能的事。</p>
+          <a class="author" target="_blank" href="https://www.jianshu.com/u/a24bb6933987?utm_campaign=maleskine&amp;utm_content=user&amp;utm_medium=seo_notes&amp;utm_source=recommendation">
+            <div class="avatar">
+              <img src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/b143ca926d16" alt="48">
+            </div>
+            <span class="name">郭绿狮</span>
+</a>        </div>
+
+        <div class="note ">
+                    <a class="title" target="_blank" href="https://www.jianshu.com/p/a0d63daabd27?utm_campaign=maleskine&amp;utm_content=note&amp;utm_medium=seo_notes&amp;utm_source=recommendation">清晨</a>
+          <p class="description">曙光隔着窗帘叫醒了我。清晨5点，开始今天的跑步计划，匀速跑2.5公里，实施5公里计划跑步的18天。 天已大亮，温和的空气轻拂着我的脸，今天是个好天气。 街道很安静，耳边是我的脚步声、呼吸声、欢快的鸟鸣声。远处，垃圾装载车轰轰作响，偶尔会有一辆轿车从我身旁经过。 山坡逐渐被甩...</p>
+          <a class="author" target="_blank" href="https://www.jianshu.com/u/820a4c6e8f9a?utm_campaign=maleskine&amp;utm_content=user&amp;utm_medium=seo_notes&amp;utm_source=recommendation">
+            <div class="avatar">
+              <img src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/45a7b612-5be2-4c18-935f-5b4d9dad1c6e" alt="48">
+            </div>
+            <span class="name">立雪寒梅1</span>
+</a>        </div>
+
+        <div class="note have-img">
+          <a class="cover" target="_blank" href="https://www.jianshu.com/p/7a9dfaff7d25?utm_campaign=maleskine&amp;utm_content=note&amp;utm_medium=seo_notes&amp;utm_source=recommendation">
+            <img src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/6376646-5efd266607be9edf.jpg" alt="240">
+</a>          <a class="title" target="_blank" href="https://www.jianshu.com/p/7a9dfaff7d25?utm_campaign=maleskine&amp;utm_content=note&amp;utm_medium=seo_notes&amp;utm_source=recommendation">嘴贱不要聊三观 不贱也不要</a>
+          <p class="description">刚认识的朋友能不能不要聊类似于人生观啊这么宏大的话题… 为了气氛的友好，多年的训练让我成长为逗哏的一把好手，再不感兴趣的话题也能听一听聊一聊，这容易让人有“矮油我们好相似该不会是知音吧” 但是可能真的不是……我只是不想就这些三观类的问题争辩…… 对于客户，可以伺候好了就拜拜...</p>
+          <a class="author" target="_blank" href="https://www.jianshu.com/u/c2bb9cf844d5?utm_campaign=maleskine&amp;utm_content=user&amp;utm_medium=seo_notes&amp;utm_source=recommendation">
+            <div class="avatar">
+              <img src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/f1ea1cac-8414-46a5-81c9-c519ff132da1.jpg" alt="48">
+            </div>
+            <span class="name">请不要叫我小Helen</span>
+</a>        </div>
+
+        <div class="note have-img">
+          <a class="cover" target="_blank" href="https://www.jianshu.com/p/9468fb006edd?utm_campaign=maleskine&amp;utm_content=note&amp;utm_medium=seo_notes&amp;utm_source=recommendation">
+            <img src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/1931912-6c41df7b8d71e0fa.jpg" alt="240">
+</a>          <a class="title" target="_blank" href="https://www.jianshu.com/p/9468fb006edd?utm_campaign=maleskine&amp;utm_content=note&amp;utm_medium=seo_notes&amp;utm_source=recommendation">打造个人知识力--《你的知识需要管理》-读后感</a>
+          <p class="description">当今无知的人不是没有知识，而是不会展示自己的知识、不会发挥知识的作用、 那么，如何使你的知识管理过程运转自如，关系到个人发展和个人竞争力的提升。 对于现代人而言单纯的讲学习已经不够！因为， 学习只是个人知识处理的一个环节，你必须还要擅长保存、传递、利用和创新知识，从学习力到...</p>
+          <a class="author" target="_blank" href="https://www.jianshu.com/u/fc5d2f0321e3?utm_campaign=maleskine&amp;utm_content=user&amp;utm_medium=seo_notes&amp;utm_source=recommendation">
+            <div class="avatar">
+              <img src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/9310690fd59a.jpg" alt="48">
+            </div>
+            <span class="name">梦里蓝天</span>
+</a>        </div>
+  </div>
+</div>
+
+    <script type="application/json" data-name="page-data">{"user_signed_in":false,"locale":"zh-CN","os":"windows","read_mode":"day","read_font":"font2","note_show":{"is_author":false,"is_following_author":false,"is_liked_note":false,"follow_state":0,"uuid":"1f7cf778-932f-4c8c-a31e-4f058ac2ecd9"},"note":{"id":6978588,"slug":"38015afcdb58","user_id":944365,"notebook_id":9976005,"commentable":true,"likes_count":754,"views_count":37221,"public_wordage":3440,"comments_count":123,"total_rewards_count":11,"is_author":false,"paid_type":"fbook_free","paid":false,"paid_content_accessible":false,"author":{"nickname":"Carson_Ho","total_wordage":272683,"followers_count":21343,"total_likes_count":14894}}}</script>
+    
+    <script src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/babel-polyfill-b99072e62e23ea801bb9.js.下载" crossorigin="anonymous"></script>
+    <script src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/web-base-3e9e754ba3c8bcaee25c.js.下载" crossorigin="anonymous"></script>
+<script src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/web-c14424a5122a2000cf13.js.下载" crossorigin="anonymous"></script>
+    
+    <script src="./Android事件分发机制详解：史上最全面、最易懂 - 简书_files/entry-bdee42b0f1d6f57fb71c.js.下载" crossorigin="anonymous"></script>
+    <script>
+  (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      if (curProtocol === 'https') {
+          bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+      }
+      else {
+          bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+      }
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+  })();
+</script>
+
+  
+
+<!----><!----></body></html>
