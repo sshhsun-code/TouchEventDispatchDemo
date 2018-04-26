@@ -8,61 +8,57 @@ import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
-import android.widget.LinearLayout;
+import android.widget.FrameLayout;
 
-public class MyGroupView extends LinearLayout{
+public class MyGroupView extends FrameLayout {
 
     public MyGroupView(Context context) {
         super(context);
+        this.setEnabled(true);
     }
 
     public MyGroupView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
+        this.setEnabled(true);
     }
 
     public MyGroupView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        this.setEnabled(true);
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public MyGroupView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        this.setEnabled(true);
+    }
+
+    @Override
+    public boolean performClick() {
+        return super.performClick();
     }
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
-        Log.e("sunqi", "MyGroupView dispatchTouchEvent --> " + ev.getAction());
+        Log.e("TouchProcess", "MyGroupView dispatchTouchEvent --> " + ev.getAction());
         return super.dispatchTouchEvent(ev);
     }
 
-
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-//        if (event.getAction() == MotionEvent.ACTION_MOVE) {
-//            Log.e("sunqi", "MyGroupView --> MotionEvent.ACTION_MOVE");
-//            int x = (int) event.getX();
-//            int y = (int) event.getY();
-//            /**
-//             * mScrollX是View左边缘的X坐标减去View内容左边缘的X坐标，因此如果手指是从左向右滑，
-//             则mScrollX为负值，反之正值，mScrollY也是一样的,见源码
-//             */
-//            scrollTo(-x, -y);
-//            return true;
-//        } else {
-//            Log.e("sunqi", "MyGroupView --> " + event.getAction());
-//        }
-        Log.e("sunqi", "MyGroupView onTouchEvent --> " + event.getAction());
-        return super.onTouchEvent(event);
+        Log.e("TouchProcess", "MyGroupView onTouchEvent --> " + event.getAction());
+        boolean result = false;
+        Log.e("TouchProcess", "MyGroupView onTouchEvent return --> " + result);
+        return result;
     }
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-//        if (ev.getAction() == MotionEvent.ACTION_MOVE) {
-//            onTouchEvent(ev);
-//            return true;
-//        }
-        Log.e("sunqi", "MyGroupView onInterceptTouchEvent --> " + ev.getAction());
-        return super.onInterceptTouchEvent(ev);
+        Log.e("TouchProcess", "MyGroupView onInterceptTouchEvent --> " + ev.getAction());
+
+        boolean result = super.onInterceptTouchEvent(ev);
+        Log.e("TouchProcess", "MyGroupView onInterceptTouchEvent return --> " + result);
+        return result;
     }
 
     @Override

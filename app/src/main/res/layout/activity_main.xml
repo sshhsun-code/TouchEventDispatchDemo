@@ -10,12 +10,17 @@
         android:id="@+id/myGroupView"
         android:layout_width="300dp"
         android:layout_height="300dp"
+        android:clickable="true"
         android:background="#ffeeaa">
-        <Button
+        <com.sunqi.test.cm.toucheventdispatchdemo.MyView
             android:id="@+id/btn_click"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="点击按钮"/>
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:text="子View"
+            android:textColor="#fff"
+            android:gravity="center"
+            android:textSize="20sp"
+            android:background="#001155"/>
     </com.sunqi.test.cm.toucheventdispatchdemo.MyGroupView>
 
 </RelativeLayout>
