@@ -39,7 +39,7 @@ public class MyView extends TextView {
     public boolean onTouchEvent(MotionEvent event) {
         Log.e("TouchProcess", "MyView onTouchEvent --> " + event.getAction());
         boolean result = true;
-        Log.e("TouchProcess", "MyView onTouchEvent return --> " + result);
+//        Log.e("TouchProcess", "MyView onTouchEvent return --> " + result);
         return result;
     }
 
@@ -47,7 +47,7 @@ public class MyView extends TextView {
     public boolean dispatchTouchEvent(MotionEvent event) {
         Log.e("TouchProcess", "MyView dispatchTouchEvent --> " + event.getAction());
         boolean result = super.dispatchTouchEvent(event);
-        Log.e("TouchProcess", "MyView dispatchTouchEvent return --> " + result);
+//        Log.e("TouchProcess", "MyView dispatchTouchEvent return --> " + result);
         return result;
     }
 }

@@ -41,23 +41,27 @@ public class MyGroupView extends FrameLayout {
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         Log.e("TouchProcess", "MyGroupView dispatchTouchEvent --> " + ev.getAction());
-        return super.dispatchTouchEvent(ev);
+        boolean result = super.dispatchTouchEvent(ev);
+//        Log.e("TouchProcess", "MyGroupView dispatchTouchEvent return --> " + result);
+        return result;
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         Log.e("TouchProcess", "MyGroupView onTouchEvent --> " + event.getAction());
-        boolean result = false;
-        Log.e("TouchProcess", "MyGroupView onTouchEvent return --> " + result);
+        boolean result = true;
+//        Log.e("TouchProcess", "MyGroupView onTouchEvent return --> " + result);
         return result;
     }
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         Log.e("TouchProcess", "MyGroupView onInterceptTouchEvent --> " + ev.getAction());
-
+        if (ev.getAction() == MotionEvent.ACTION_MOVE) {
+            return true;
+        }
         boolean result = super.onInterceptTouchEvent(ev);
-        Log.e("TouchProcess", "MyGroupView onInterceptTouchEvent return --> " + result);
+//        Log.e("TouchProcess", "MyGroupView onInterceptTouchEvent return --> " + result);
         return result;
     }
 
