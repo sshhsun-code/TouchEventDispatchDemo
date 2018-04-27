@@ -1,7 +1,9 @@
 # TouchEventDispatchDemo
 # 通过源码和实际验证，了解Android事件分发机制及原理并总结 #
 
-##1.源码分析ACTION_DOWN事件的分发##
+
+# 1.源码分析ACTION_DOWN事件的分发 #
+
 Android中的事件分发在Activity,ViewGroup,View之间进行分发传递。
 
 <strong>并且事件传递的顺序：Activity -> ViewGroup -> View</strong>
@@ -406,7 +408,9 @@ ViewGroup的分发中，如果不被拦截(onInterceptTouchEvent 返回 true)，
 	return consume;
 }
 
-##2.ACTION_DOWN事件分发图解与总结##
+
+# 2.ACTION_DOWN事件分发图解与总结 #
+
 
 **经过大概的整理和源码分析，我们大概可以得到一个这样的关系图：**
 
@@ -423,7 +427,8 @@ ViewGroup 和View的这些方法的默认实现就是会让整个事件安装U�
 
 ![](http://o9m6aqy3r.bkt.clouddn.com/%E5%AE%8C%E6%95%B4%E7%9A%84%E9%BB%98%E8%AE%A4%E5%A4%84%E7%90%86%E4%B8%8B%E7%9A%84%E4%BA%8B%E4%BB%B6%E5%88%86%E5%8F%91U%E5%BD%A2%E5%9B%BE.png)
 
-##3.关于ACTION_MOVE与ACTION_UP事件的分发##
+
+# 3.关于ACTION_MOVE与ACTION_UP事件的分发 #
 
 
 **3.1 假设在如图的界面中，黄色背景为MyGroupView，子View为MyView.**
@@ -473,3 +478,10 @@ B 不拦截 down事件，但是拦截了move事件后。
 ><font color = "#f00"> <strong>onInterceptTouchEvent（），因该方法一旦返回一次true，就再也不会被调用了</strong></font>
 
 ><font color = "#f00"> <strong>onInterceptTouchEvent（），因该方法一旦返回一次true，就再也不会被调用了</strong></font>
+
+
+
+---
+>参考：
+><br><font color = "#1DACD6">**https://www.jianshu.com/p/38015afcdb58 <br>
+>https://www.jianshu.com/p/e99b5e8bd67b**</font>
